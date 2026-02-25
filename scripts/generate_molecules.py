@@ -606,6 +606,789 @@ def glycine():
     return build_molecule("glycine", "Glycine", "C2H5NO2", "NCC(=O)O", atoms, bonds, modes)
 
 
+def acetone():
+    """CH3COCH3 - C2v, 10 atoms, 24 modes"""
+    d_cc = 1.52
+    d_co = 1.20
+    d_ch = 1.09
+    # C=O along +y from central C
+    atoms = [
+        make_atom("C", 0, 0, 0),                           # 0: central C
+        make_atom("O", 0, d_co, 0),                         # 1: =O
+        make_atom("C", -d_cc * math.sin(math.radians(58.5)),
+                  -d_cc * math.cos(math.radians(58.5)), 0),  # 2: CH3 left
+        make_atom("C", d_cc * math.sin(math.radians(58.5)),
+                  -d_cc * math.cos(math.radians(58.5)), 0),  # 3: CH3 right
+    ]
+    # H atoms on left CH3 (atom 2)
+    cx2, cy2 = atoms[2]["x"], atoms[2]["y"]
+    atoms.append(make_atom("H", cx2, cy2 - d_ch, 0))          # 4
+    atoms.append(make_atom("H", cx2 - d_ch * 0.87, cy2 + d_ch * 0.5, d_ch * 0.5))  # 5
+    atoms.append(make_atom("H", cx2 - d_ch * 0.87, cy2 + d_ch * 0.5, -d_ch * 0.5))  # 6
+    # H atoms on right CH3 (atom 3)
+    cx3, cy3 = atoms[3]["x"], atoms[3]["y"]
+    atoms.append(make_atom("H", cx3, cy3 - d_ch, 0))          # 7
+    atoms.append(make_atom("H", cx3 + d_ch * 0.87, cy3 + d_ch * 0.5, d_ch * 0.5))  # 8
+    atoms.append(make_atom("H", cx3 + d_ch * 0.87, cy3 + d_ch * 0.5, -d_ch * 0.5))  # 9
+    bonds = [
+        make_bond(0, 1, 2), make_bond(0, 2, 1), make_bond(0, 3, 1),
+        make_bond(2, 4, 1), make_bond(2, 5, 1), make_bond(2, 6, 1),
+        make_bond(3, 7, 1), make_bond(3, 8, 1), make_bond(3, 9, 1),
+    ]
+    n = 10
+    import random
+    random.seed(100)
+    mode_data = [
+        (0, 125.0, 0.5, 0.05, "A2 torsion"),
+        (1, 380.0, 2.0, 0.3, "B1 CCC bend"),
+        (2, 484.0, 3.0, 0.5, "A1 CCC bend"),
+        (3, 530.0, 5.0, 0.2, "B2 C=O oop"),
+        (4, 777.0, 4.0, 0.8, "A1 C-C sym stretch"),
+        (5, 891.0, 3.0, 0.4, "B1 CH3 rock"),
+        (6, 891.0, 3.0, 0.4, "A2 CH3 rock"),
+        (7, 1066.0, 8.0, 0.6, "B1 CH3 rock"),
+        (8, 1066.0, 8.0, 0.6, "A1 CH3 rock"),
+        (9, 1222.0, 20.0, 1.0, "B2 C-C asym stretch"),
+        (10, 1364.0, 10.0, 2.0, "A1 sym CH3 bend"),
+        (11, 1364.0, 10.0, 2.0, "B1 sym CH3 bend"),
+        (12, 1410.0, 5.0, 1.0, "A2 CH3 bend"),
+        (13, 1426.0, 6.0, 1.0, "A1 CH3 bend"),
+        (14, 1426.0, 6.0, 1.0, "B2 CH3 bend"),
+        (15, 1454.0, 3.0, 0.8, "B1 CH3 bend"),
+        (16, 1720.0, 75.0, 4.0, "A1 C=O stretch"),
+        (17, 2922.0, 5.0, 5.0, "A1 sym CH3 stretch"),
+        (18, 2922.0, 5.0, 5.0, "B1 sym CH3 stretch"),
+        (19, 2972.0, 3.0, 2.0, "A2 asym CH3 stretch"),
+        (20, 2972.0, 3.0, 2.0, "B2 asym CH3 stretch"),
+        (21, 3005.0, 4.0, 1.5, "A1 asym CH3 stretch"),
+        (22, 3005.0, 4.0, 1.5, "B1 asym CH3 stretch"),
+        (23, 3019.0, 2.0, 1.0, "B2 CH3 stretch"),
+    ]
+    modes = []
+    for idx, freq, ir, raman, sym in mode_data:
+        disps = [[round(random.gauss(0, 0.3), 3) for _ in range(3)] for _ in range(n)]
+        if "C=O" in sym and "stretch" in sym.lower():
+            disps[1] = [0, round(random.gauss(0, 0.8), 3), 0]
+        elif "CH3 stretch" in sym:
+            for i in [4, 5, 6, 7, 8, 9]:
+                disps[i] = [round(random.gauss(0, 0.8), 3) for _ in range(3)]
+        modes.append(make_mode(idx, freq, ir, raman, disps, sym))
+    return build_molecule("acetone", "Acetone", "C3H6O", "CC(=O)C", atoms, bonds, modes)
+
+
+def ethylene():
+    """C2H4 - D2h, 6 atoms, 12 modes. Mutual exclusion principle demo."""
+    d_cc = 1.339
+    d_ch = 1.086
+    hcc_angle = math.radians(121.3)
+    hx = d_ch * math.cos(hcc_angle)
+    hy = d_ch * math.sin(hcc_angle)
+    atoms = [
+        make_atom("C", -d_cc / 2, 0, 0),   # 0: C left
+        make_atom("C", d_cc / 2, 0, 0),    # 1: C right
+        make_atom("H", -d_cc / 2 - hx, hy, 0),   # 2: H top-left
+        make_atom("H", -d_cc / 2 - hx, -hy, 0),  # 3: H bot-left
+        make_atom("H", d_cc / 2 + hx, hy, 0),    # 4: H top-right
+        make_atom("H", d_cc / 2 + hx, -hy, 0),   # 5: H bot-right
+    ]
+    bonds = [
+        make_bond(0, 1, 2),
+        make_bond(0, 2, 1), make_bond(0, 3, 1),
+        make_bond(1, 4, 1), make_bond(1, 5, 1),
+    ]
+    modes = [
+        # Ag modes (Raman active only - mutual exclusion for D2h)
+        make_mode(0, 1623.0, 0.0, 5.0, [
+            [-0.3, 0, 0], [0.3, 0, 0],
+            [-0.5, 0.3, 0], [-0.5, -0.3, 0],
+            [0.5, 0.3, 0], [0.5, -0.3, 0]
+        ], "Ag C=C stretch"),
+        make_mode(1, 3026.0, 0.0, 8.0, [
+            [0, 0, 0], [0, 0, 0],
+            [-0.5, 0.5, 0], [-0.5, -0.5, 0],
+            [-0.5, 0.5, 0], [-0.5, -0.5, 0]
+        ], "Ag sym CH stretch"),
+        make_mode(2, 1342.0, 0.0, 3.0, [
+            [0, 0, 0], [0, 0, 0],
+            [0.3, -0.5, 0], [0.3, 0.5, 0],
+            [-0.3, -0.5, 0], [-0.3, 0.5, 0]
+        ], "Ag CH2 scissor"),
+        # B1g (Raman only)
+        make_mode(3, 3103.0, 0.0, 4.0, [
+            [0, 0, 0], [0, 0, 0],
+            [-0.5, 0.5, 0], [-0.5, -0.5, 0],
+            [0.5, -0.5, 0], [0.5, 0.5, 0]
+        ], "B1g asym CH stretch"),
+        # Au (inactive)
+        make_mode(4, 1023.0, 0.0, 0.0, [
+            [0, 0, 0.3], [0, 0, -0.3],
+            [0, 0, -0.5], [0, 0, 0.5],
+            [0, 0, 0.5], [0, 0, -0.5]
+        ], "Au CH2 twist"),
+        # B1u (IR active only)
+        make_mode(5, 949.0, 20.0, 0.0, [
+            [0, 0, 0.3], [0, 0, 0.3],
+            [0, 0, -0.5], [0, 0, 0.5],
+            [0, 0, -0.5], [0, 0, 0.5]
+        ], "B1u CH2 wag"),
+        make_mode(6, 3106.0, 15.0, 0.0, [
+            [0, 0, 0], [0, 0, 0],
+            [-0.5, 0.5, 0], [-0.5, -0.5, 0],
+            [0.5, 0.5, 0], [0.5, -0.5, 0]
+        ], "B1u asym CH stretch"),
+        # B2u (IR active only)
+        make_mode(7, 826.0, 12.0, 0.0, [
+            [0, 0, 0], [0, 0, 0],
+            [0.3, 0.5, 0], [0.3, -0.5, 0],
+            [0.3, 0.5, 0], [0.3, -0.5, 0]
+        ], "B2u CH2 rock"),
+        # B3u (IR active only)
+        make_mode(8, 1444.0, 25.0, 0.0, [
+            [0, 0.2, 0], [0, -0.2, 0],
+            [0.3, -0.5, 0], [-0.3, -0.5, 0],
+            [-0.3, 0.5, 0], [0.3, 0.5, 0]
+        ], "B3u CH2 scissor"),
+        make_mode(9, 3105.0, 10.0, 0.0, [
+            [0, 0.05, 0], [0, -0.05, 0],
+            [0.5, -0.5, 0], [0.5, 0.5, 0],
+            [-0.5, 0.5, 0], [-0.5, -0.5, 0]
+        ], "B3u asym CH stretch"),
+        # B2g (Raman only)
+        make_mode(10, 943.0, 0.0, 1.5, [
+            [0, 0, -0.3], [0, 0, 0.3],
+            [0, 0, 0.5], [0, 0, -0.5],
+            [0, 0, 0.5], [0, 0, -0.5]
+        ], "B2g CH2 wag"),
+        # B3g (Raman only)
+        make_mode(11, 1236.0, 0.0, 2.0, [
+            [0, 0.2, 0], [0, -0.2, 0],
+            [-0.3, 0.5, 0], [0.3, 0.5, 0],
+            [0.3, -0.5, 0], [-0.3, -0.5, 0]
+        ], "B3g CH2 rock"),
+    ]
+    return build_molecule("ethylene", "Ethylene", "C2H4", "C=C", atoms, bonds, modes)
+
+
+def allene():
+    """C3H4 - D2d, 7 atoms, 15 modes. Perpendicular CH2 planes."""
+    d_cc = 1.308  # C=C in allene
+    d_ch = 1.087
+    hcc_angle = math.radians(120.9)
+    hx = d_ch * math.cos(hcc_angle)
+    hy = d_ch * math.sin(hcc_angle)
+    atoms = [
+        make_atom("C", 0, 0, 0),                  # 0: central C
+        make_atom("C", -d_cc, 0, 0),              # 1: left C
+        make_atom("C", d_cc, 0, 0),               # 2: right C
+        # Left CH2 in yz plane
+        make_atom("H", -d_cc - hx, hy, 0),        # 3
+        make_atom("H", -d_cc - hx, -hy, 0),       # 4
+        # Right CH2 in xz plane (perpendicular!)
+        make_atom("H", d_cc + hx, 0, hy),         # 5
+        make_atom("H", d_cc + hx, 0, -hy),        # 6
+    ]
+    bonds = [
+        make_bond(0, 1, 2), make_bond(0, 2, 2),
+        make_bond(1, 3, 1), make_bond(1, 4, 1),
+        make_bond(2, 5, 1), make_bond(2, 6, 1),
+    ]
+    n = 7
+    import random
+    random.seed(101)
+    mode_data = [
+        (0, 353.0, 0.0, 0.3, "E CH2 rock"),
+        (1, 353.0, 0.0, 0.3, "E CH2 rock"),
+        (2, 841.0, 30.0, 0.0, "B2 CH2 wag"),
+        (3, 865.0, 0.0, 0.0, "A2 CH2 twist"),
+        (4, 999.0, 0.0, 2.0, "A1 C=C=C sym stretch"),
+        (5, 1073.0, 8.0, 0.0, "B1 CH2 rock"),
+        (6, 1073.0, 8.0, 0.0, "E CH2 rock"),
+        (7, 1398.0, 0.0, 3.5, "A1 CH2 scissor"),
+        (8, 1443.0, 12.0, 0.0, "B2 CH2 scissor"),
+        (9, 1957.0, 60.0, 0.0, "B2 C=C=C asym stretch"),
+        (10, 3007.0, 0.0, 8.0, "A1 sym CH stretch"),
+        (11, 3007.0, 15.0, 0.0, "B2 asym CH stretch"),
+        (12, 3086.0, 0.0, 4.0, "B1 sym CH stretch"),
+        (13, 3086.0, 10.0, 0.0, "E asym CH stretch"),
+        (14, 3086.0, 10.0, 0.0, "E asym CH stretch"),
+    ]
+    modes = []
+    for idx, freq, ir, raman, sym in mode_data:
+        disps = [[round(random.gauss(0, 0.3), 3) for _ in range(3)] for _ in range(n)]
+        if "C=C=C" in sym and "sym" in sym:
+            disps[0] = [0, 0, 0]
+            disps[1] = [round(random.gauss(0, 0.6), 3), 0, 0]
+            disps[2] = [round(-random.gauss(0, 0.6), 3), 0, 0]
+        elif "C=C=C" in sym and "asym" in sym:
+            disps[0] = [round(random.gauss(0, 0.8), 3), 0, 0]
+            disps[1] = [round(-random.gauss(0, 0.4), 3), 0, 0]
+            disps[2] = [round(-random.gauss(0, 0.4), 3), 0, 0]
+        elif "CH stretch" in sym:
+            for i in [3, 4, 5, 6]:
+                disps[i] = [round(random.gauss(0, 0.8), 3) for _ in range(3)]
+        modes.append(make_mode(idx, freq, ir, raman, disps, sym))
+    return build_molecule("allene", "Allene", "C3H4", "C=C=C", atoms, bonds, modes)
+
+
+def chloroform():
+    """CHCl3 - C3v, 5 atoms, 9 modes."""
+    d_ccl = 1.758
+    d_ch = 1.10
+    # Tetrahedral-like angles: Cl-C-Cl ~ 111.3 deg
+    # H on +z axis, Cl atoms arranged below
+    cl_angle = math.radians(180.0 - 111.3)  # angle from +z
+    cl_r = d_ccl * math.sin(cl_angle)
+    cl_z = d_ccl * math.cos(cl_angle)
+    atoms = [
+        make_atom("C", 0, 0, 0),                          # 0
+        make_atom("H", 0, 0, d_ch),                        # 1
+        make_atom("Cl", cl_r, 0, cl_z),                    # 2
+        make_atom("Cl", -cl_r * 0.5, cl_r * 0.866, cl_z), # 3
+        make_atom("Cl", -cl_r * 0.5, -cl_r * 0.866, cl_z),# 4
+    ]
+    bonds = [
+        make_bond(0, 1, 1), make_bond(0, 2, 1),
+        make_bond(0, 3, 1), make_bond(0, 4, 1),
+    ]
+    modes = [
+        # A1 modes (IR + Raman active)
+        make_mode(0, 262.0, 2.0, 3.0, [
+            [0, 0, 0.1], [0, 0, 0.3],
+            [0.5, 0, -0.3], [-0.25, 0.43, -0.3], [-0.25, -0.43, -0.3]
+        ], "A1 CCl3 sym bend"),
+        make_mode(1, 680.0, 5.0, 8.0, [
+            [0, 0, 0.2], [0, 0, -0.1],
+            [0.5, 0, -0.4], [-0.25, 0.43, -0.4], [-0.25, -0.43, -0.4]
+        ], "A1 CCl3 sym stretch"),
+        make_mode(2, 3034.0, 15.0, 5.0, [
+            [0, 0, -0.05], [0, 0, 0.95],
+            [0, 0, 0.01], [0, 0, 0.01], [0, 0, 0.01]
+        ], "A1 CH stretch"),
+        # E modes (IR + Raman, doubly degenerate)
+        make_mode(3, 366.0, 1.5, 1.0, [
+            [0.2, 0, 0], [-0.1, 0, 0],
+            [-0.6, 0, 0.1], [0.3, -0.5, 0.1], [0.3, 0.5, 0.1]
+        ], "E CCl3 bend"),
+        make_mode(4, 366.0, 1.5, 1.0, [
+            [0, 0.2, 0], [0, -0.1, 0],
+            [0, 0, 0.1], [-0.5, -0.3, 0.1], [0.5, -0.3, 0.1]
+        ], "E CCl3 bend"),
+        make_mode(5, 761.0, 30.0, 2.0, [
+            [0.2, 0, 0], [-0.05, 0, 0],
+            [-0.6, 0, 0.3], [0.3, -0.5, 0.3], [0.3, 0.5, 0.3]
+        ], "E CCl3 asym stretch"),
+        make_mode(6, 761.0, 30.0, 2.0, [
+            [0, 0.2, 0], [0, -0.05, 0],
+            [0, 0, 0.3], [-0.5, -0.3, 0.3], [0.5, -0.3, 0.3]
+        ], "E CCl3 asym stretch"),
+        make_mode(7, 1220.0, 10.0, 1.5, [
+            [0.1, 0, 0], [-0.8, 0, 0],
+            [-0.05, 0, 0], [0.03, -0.04, 0], [0.03, 0.04, 0]
+        ], "E CH bend"),
+        make_mode(8, 1220.0, 10.0, 1.5, [
+            [0, 0.1, 0], [0, -0.8, 0],
+            [0, -0.05, 0], [-0.04, 0.03, 0], [0.04, 0.03, 0]
+        ], "E CH bend"),
+    ]
+    return build_molecule("chloroform", "Chloroform", "CHCl3", "ClC(Cl)Cl", atoms, bonds, modes)
+
+
+def nitrogen_dioxide():
+    """NO2 - C2v, 3 atoms, 3 modes. Bent, paramagnetic."""
+    d_no = 1.197
+    angle = math.radians(134.1 / 2)
+    atoms = [
+        make_atom("N", 0, 0, 0),
+        make_atom("O", -d_no * math.sin(angle), d_no * math.cos(angle), 0),
+        make_atom("O", d_no * math.sin(angle), d_no * math.cos(angle), 0),
+    ]
+    bonds = [make_bond(0, 1, 2), make_bond(0, 2, 2)]
+    modes = [
+        make_mode(0, 750.0, 5.0, 1.0, [
+            [0, -0.3, 0], [0.6, 0.4, 0], [-0.6, 0.4, 0]
+        ], "A1 bend"),
+        make_mode(1, 1318.0, 10.0, 6.0, [
+            [0, 0.4, 0], [0, -0.7, 0], [0, -0.7, 0]
+        ], "A1 sym stretch"),
+        make_mode(2, 1618.0, 40.0, 0.5, [
+            [0, 0, 0], [-0.7, 0.3, 0], [0.7, 0.3, 0]
+        ], "B2 asym stretch"),
+    ]
+    return build_molecule("nitrogen_dioxide", "Nitrogen Dioxide", "NO2", "[O]N=O", atoms, bonds, modes)
+
+
+def ozone():
+    """O3 - C2v, 3 atoms, 3 modes. Same geometry type as SO2."""
+    d_oo = 1.278
+    angle = math.radians(116.8 / 2)
+    atoms = [
+        make_atom("O", 0, 0, 0),
+        make_atom("O", -d_oo * math.sin(angle), d_oo * math.cos(angle), 0),
+        make_atom("O", d_oo * math.sin(angle), d_oo * math.cos(angle), 0),
+    ]
+    bonds = [make_bond(0, 1, 2), make_bond(0, 2, 2)]
+    modes = [
+        make_mode(0, 701.0, 3.0, 0.5, [
+            [0, -0.4, 0], [0.6, 0.5, 0], [-0.6, 0.5, 0]
+        ], "A1 bend"),
+        make_mode(1, 1110.0, 5.0, 6.0, [
+            [0, 0.4, 0], [0, -0.7, 0], [0, -0.7, 0]
+        ], "A1 sym stretch"),
+        make_mode(2, 1042.0, 30.0, 0.3, [
+            [0, 0, 0], [-0.7, 0.3, 0], [0.7, 0.3, 0]
+        ], "B2 asym stretch"),
+    ]
+    return build_molecule("ozone", "Ozone", "O3", "[O-][O+]=O", atoms, bonds, modes)
+
+
+def cyanogen():
+    """C2N2 (N#C-C#N) - D_inf_h, 4 atoms, 7 modes. Linear, symmetric."""
+    d_cn = 1.163
+    d_cc = 1.389
+    atoms = [
+        make_atom("N", -(d_cc / 2 + d_cn), 0, 0),  # 0
+        make_atom("C", -d_cc / 2, 0, 0),             # 1
+        make_atom("C", d_cc / 2, 0, 0),              # 2
+        make_atom("N", d_cc / 2 + d_cn, 0, 0),       # 3
+    ]
+    bonds = [
+        make_bond(0, 1, 3), make_bond(1, 2, 1), make_bond(2, 3, 3),
+    ]
+    modes = [
+        # Sigma_g sym stretch (Raman only)
+        make_mode(0, 2158.0, 0.0, 10.0, [
+            [0.6, 0, 0], [-0.3, 0, 0], [0.3, 0, 0], [-0.6, 0, 0]
+        ], "Sigma_g sym CN stretch"),
+        # Sigma_g sym CC stretch (Raman only)
+        make_mode(1, 846.0, 0.0, 4.0, [
+            [-0.3, 0, 0], [0.6, 0, 0], [-0.6, 0, 0], [0.3, 0, 0]
+        ], "Sigma_g sym CC stretch"),
+        # Sigma_u asym stretch (IR only)
+        make_mode(2, 2330.0, 80.0, 0.0, [
+            [0.6, 0, 0], [-0.3, 0, 0], [-0.3, 0, 0], [0.6, 0, 0]
+        ], "Sigma_u asym CN stretch"),
+        # Pi_g bend (Raman only, 2-fold degenerate)
+        make_mode(3, 507.0, 0.0, 2.0, [
+            [0, 0.5, 0], [0, -0.5, 0], [0, 0.5, 0], [0, -0.5, 0]
+        ], "Pi_g bend"),
+        make_mode(4, 507.0, 0.0, 2.0, [
+            [0, 0, 0.5], [0, 0, -0.5], [0, 0, 0.5], [0, 0, -0.5]
+        ], "Pi_g bend"),
+        # Pi_u bend (IR only, 2-fold degenerate)
+        make_mode(5, 234.0, 5.0, 0.0, [
+            [0, 0.5, 0], [0, -0.5, 0], [0, -0.5, 0], [0, 0.5, 0]
+        ], "Pi_u bend"),
+        make_mode(6, 234.0, 5.0, 0.0, [
+            [0, 0, 0.5], [0, 0, -0.5], [0, 0, -0.5], [0, 0, 0.5]
+        ], "Pi_u bend"),
+    ]
+    return build_molecule("cyanogen", "Cyanogen", "C2N2", "N#CC#N", atoms, bonds, modes)
+
+
+def methyl_fluoride():
+    """CH3F - C3v, 5 atoms, 9 modes."""
+    d_cf = 1.383
+    d_ch = 1.095
+    # F along +z, H atoms below
+    hcf_angle = math.radians(108.8)
+    h_z = d_ch * math.cos(hcf_angle)
+    h_r = d_ch * math.sin(hcf_angle)
+    atoms = [
+        make_atom("C", 0, 0, 0),                          # 0
+        make_atom("F", 0, 0, d_cf),                        # 1
+        make_atom("H", h_r, 0, h_z),                       # 2
+        make_atom("H", -h_r * 0.5, h_r * 0.866, h_z),    # 3
+        make_atom("H", -h_r * 0.5, -h_r * 0.866, h_z),   # 4
+    ]
+    bonds = [
+        make_bond(0, 1, 1), make_bond(0, 2, 1),
+        make_bond(0, 3, 1), make_bond(0, 4, 1),
+    ]
+    modes = [
+        # A1 modes (IR + Raman)
+        make_mode(0, 1049.0, 60.0, 2.0, [
+            [0, 0, 0.3], [0, 0, -0.7],
+            [0.3, 0, 0.15], [-0.15, 0.26, 0.15], [-0.15, -0.26, 0.15]
+        ], "A1 C-F stretch"),
+        make_mode(1, 1460.0, 3.0, 1.5, [
+            [0, 0, 0.1], [0, 0, 0],
+            [0.2, 0, -0.5], [-0.1, 0.17, -0.5], [-0.1, -0.17, -0.5]
+        ], "A1 CH3 sym bend"),
+        make_mode(2, 2930.0, 5.0, 8.0, [
+            [0, 0, -0.05], [0, 0, 0],
+            [0.3, 0, -0.6], [-0.15, 0.26, -0.6], [-0.15, -0.26, -0.6]
+        ], "A1 CH3 sym stretch"),
+        # E modes (IR + Raman, doubly degenerate)
+        make_mode(3, 1182.0, 3.0, 0.5, [
+            [0.2, 0, 0], [-0.05, 0, 0],
+            [-0.6, 0, 0.2], [0.3, -0.5, 0.2], [0.3, 0.5, 0.2]
+        ], "E CH3 rock"),
+        make_mode(4, 1182.0, 3.0, 0.5, [
+            [0, 0.2, 0], [0, -0.05, 0],
+            [0, 0, 0.2], [-0.5, -0.3, 0.2], [0.5, -0.3, 0.2]
+        ], "E CH3 rock"),
+        make_mode(5, 1467.0, 5.0, 1.0, [
+            [0, 0, 0], [0, 0, 0],
+            [0, 0.5, -0.3], [0.43, -0.25, -0.3], [-0.43, -0.25, -0.3]
+        ], "E CH3 asym bend"),
+        make_mode(6, 1467.0, 5.0, 1.0, [
+            [0, 0, 0], [0, 0, 0],
+            [0.5, 0, -0.3], [-0.25, -0.43, -0.3], [-0.25, 0.43, -0.3]
+        ], "E CH3 asym bend"),
+        make_mode(7, 3006.0, 8.0, 3.0, [
+            [0, 0, 0], [0, 0, 0],
+            [0, 0.5, -0.5], [0.43, -0.25, -0.5], [-0.43, -0.25, -0.5]
+        ], "E CH3 asym stretch"),
+        make_mode(8, 3006.0, 8.0, 3.0, [
+            [0, 0, 0], [0, 0, 0],
+            [0.5, 0, -0.5], [-0.25, -0.43, -0.5], [-0.25, 0.43, -0.5]
+        ], "E CH3 asym stretch"),
+    ]
+    return build_molecule("methyl_fluoride", "Methyl Fluoride", "CH3F", "CF", atoms, bonds, modes)
+
+
+def nitric_acid():
+    """HNO3 - Cs, 5 atoms, 9 modes."""
+    # N at origin, O atoms arranged around it
+    d_n_oh = 1.406
+    d_n_o1 = 1.211   # shorter N=O
+    d_n_o2 = 1.199   # shorter N=O
+    d_oh = 0.964
+    atoms = [
+        make_atom("N", 0, 0, 0),                            # 0
+        make_atom("O", 1.21, 0, 0),                          # 1: N=O (trans to OH)
+        make_atom("O", -0.55, 1.08, 0),                     # 2: N=O (cis)
+        make_atom("O", -0.70, -1.02, 0),                    # 3: N-OH
+        make_atom("H", -0.70 + 0.87, -1.02 - 0.50, 0),     # 4: H on OH
+    ]
+    bonds = [
+        make_bond(0, 1, 2), make_bond(0, 2, 2),
+        make_bond(0, 3, 1), make_bond(3, 4, 1),
+    ]
+    modes = [
+        make_mode(0, 458.0, 8.0, 0.5, [
+            [0, 0, 0.3], [0, 0, -0.2], [0, 0, -0.2], [0, 0, -0.3], [0, 0, 0.5]
+        ], "A' NO2 bend"),
+        make_mode(1, 580.0, 5.0, 0.3, [
+            [0, 0, 0], [0, 0, 0], [0, 0, 0], [0.3, -0.5, 0], [-0.5, 0.8, 0]
+        ], "A' N-OH torsion"),
+        make_mode(2, 647.0, 10.0, 0.2, [
+            [0, 0, 0.2], [0, 0, -0.5], [0, 0, 0.5], [0, 0, -0.3], [0, 0, 0.1]
+        ], "A'' NO2 oop"),
+        make_mode(3, 879.0, 15.0, 1.0, [
+            [0.2, 0, 0], [0.1, 0, 0], [0.1, 0, 0], [-0.7, 0, 0], [0.3, 0, 0]
+        ], "A' N-O stretch"),
+        make_mode(4, 1303.0, 50.0, 4.0, [
+            [0, 0.3, 0], [0, -0.5, 0], [0, -0.5, 0], [0, 0.1, 0], [0, 0.2, 0]
+        ], "A' NO2 sym stretch"),
+        make_mode(5, 1326.0, 20.0, 1.5, [
+            [0, 0, 0], [-0.6, 0, 0], [0.6, 0, 0], [0, 0, 0], [0, 0, 0]
+        ], "A' NO2 asym stretch"),
+        make_mode(6, 1700.0, 70.0, 3.0, [
+            [0.1, 0, 0], [-0.7, 0, 0], [-0.7, 0, 0], [0.1, 0, 0], [0, 0, 0]
+        ], "A' N=O stretch"),
+        make_mode(7, 1330.0, 25.0, 2.0, [
+            [0, 0, 0], [0, 0, 0], [0, 0, 0], [0.1, 0.1, 0], [-0.5, -0.8, 0]
+        ], "A' NOH bend"),
+        make_mode(8, 3550.0, 40.0, 3.0, [
+            [0, 0, 0], [0, 0, 0], [0, 0, 0], [0.02, 0, 0], [0.5, -0.85, 0]
+        ], "A' O-H stretch"),
+    ]
+    return build_molecule("nitric_acid", "Nitric Acid", "HNO3", "[O-][N+](=O)O", atoms, bonds, modes)
+
+
+def hydrazine():
+    """N2H4 - C2, 6 atoms, 12 modes. Gauche conformation."""
+    d_nn = 1.449
+    d_nh = 1.021
+    # Gauche: dihedral ~91 degrees
+    nnh_angle = math.radians(106.0)
+    h_z = d_nh * math.cos(nnh_angle)
+    h_r = d_nh * math.sin(nnh_angle)
+    dihedral = math.radians(91.0)
+    atoms = [
+        make_atom("N", -d_nn / 2, 0, 0),                  # 0: N left
+        make_atom("N", d_nn / 2, 0, 0),                   # 1: N right
+        # H on left N (gauche pair 1)
+        make_atom("H", -d_nn / 2 - h_z, h_r * math.cos(0), h_r * math.sin(0)),     # 2
+        make_atom("H", -d_nn / 2 - h_z, h_r * math.cos(2.09), h_r * math.sin(2.09)),  # 3
+        # H on right N (rotated by dihedral)
+        make_atom("H", d_nn / 2 + h_z, h_r * math.cos(dihedral), h_r * math.sin(dihedral)),  # 4
+        make_atom("H", d_nn / 2 + h_z, h_r * math.cos(dihedral + 2.09), h_r * math.sin(dihedral + 2.09)),  # 5
+    ]
+    bonds = [
+        make_bond(0, 1, 1),
+        make_bond(0, 2, 1), make_bond(0, 3, 1),
+        make_bond(1, 4, 1), make_bond(1, 5, 1),
+    ]
+    n = 6
+    import random
+    random.seed(102)
+    mode_data = [
+        (0, 371.0, 5.0, 0.3, "A torsion"),
+        (1, 780.0, 8.0, 0.5, "B NH2 wag"),
+        (2, 815.0, 6.0, 0.8, "A NH2 wag"),
+        (3, 885.0, 3.0, 1.0, "A N-N stretch"),
+        (4, 1098.0, 10.0, 0.4, "B NH2 rock"),
+        (5, 1098.0, 10.0, 0.4, "A NH2 rock"),
+        (6, 1275.0, 5.0, 0.6, "B NH2 twist"),
+        (7, 1587.0, 15.0, 2.0, "A NH2 scissor"),
+        (8, 1628.0, 12.0, 1.5, "B NH2 scissor"),
+        (9, 3297.0, 2.0, 5.0, "A NH2 sym stretch"),
+        (10, 3325.0, 1.5, 4.0, "B NH2 sym stretch"),
+        (11, 3350.0, 3.0, 3.0, "A NH2 asym stretch"),
+    ]
+    modes = []
+    for idx, freq, ir, raman, sym in mode_data:
+        disps = [[round(random.gauss(0, 0.3), 3) for _ in range(3)] for _ in range(n)]
+        if "N-N" in sym:
+            disps[0] = [round(random.gauss(0, 0.7), 3), 0, 0]
+            disps[1] = [round(-random.gauss(0, 0.7), 3), 0, 0]
+        elif "NH2" in sym and "stretch" in sym:
+            for i in [2, 3, 4, 5]:
+                disps[i] = [round(random.gauss(0, 0.8), 3) for _ in range(3)]
+        modes.append(make_mode(idx, freq, ir, raman, disps, sym))
+    return build_molecule("hydrazine", "Hydrazine", "N2H4", "NN", atoms, bonds, modes)
+
+
+def propyne():
+    """C3H4 (methylacetylene) - C3v, 7 atoms, 15 modes. Terminal alkyne."""
+    d_ct = 1.206   # C triple bond
+    d_cs = 1.459   # C-C single
+    d_ch_sp = 1.062  # sp C-H
+    d_ch_sp3 = 1.09  # sp3 C-H
+    # Linear C-C-C along x axis
+    atoms = [
+        make_atom("C", 0, 0, 0),                          # 0: CH3 carbon
+        make_atom("C", d_cs, 0, 0),                        # 1: triple bond C
+        make_atom("C", d_cs + d_ct, 0, 0),                 # 2: terminal C
+        make_atom("H", d_cs + d_ct + d_ch_sp, 0, 0),      # 3: terminal H
+        # CH3 hydrogens
+        make_atom("H", -d_ch_sp3 * 0.33, d_ch_sp3 * 0.94, 0),  # 4
+        make_atom("H", -d_ch_sp3 * 0.33, -d_ch_sp3 * 0.47, d_ch_sp3 * 0.82),  # 5
+        make_atom("H", -d_ch_sp3 * 0.33, -d_ch_sp3 * 0.47, -d_ch_sp3 * 0.82),  # 6
+    ]
+    bonds = [
+        make_bond(0, 1, 1), make_bond(1, 2, 3), make_bond(2, 3, 1),
+        make_bond(0, 4, 1), make_bond(0, 5, 1), make_bond(0, 6, 1),
+    ]
+    n = 7
+    import random
+    random.seed(103)
+    mode_data = [
+        (0, 328.0, 0.5, 0.1, "E CCC bend"),
+        (1, 328.0, 0.5, 0.1, "E CCC bend"),
+        (2, 633.0, 15.0, 0.0, "E CH bend (sp)"),
+        (3, 633.0, 15.0, 0.0, "E CH bend (sp)"),
+        (4, 930.0, 5.0, 1.0, "A1 C-C stretch"),
+        (5, 1036.0, 3.0, 0.4, "E CH3 rock"),
+        (6, 1036.0, 3.0, 0.4, "E CH3 rock"),
+        (7, 1382.0, 2.0, 1.5, "A1 CH3 sym bend"),
+        (8, 1452.0, 5.0, 0.8, "E CH3 asym bend"),
+        (9, 1452.0, 5.0, 0.8, "E CH3 asym bend"),
+        (10, 2142.0, 3.0, 8.0, "A1 C#C stretch"),
+        (11, 2918.0, 5.0, 5.0, "A1 CH3 sym stretch"),
+        (12, 3008.0, 3.0, 2.0, "E CH3 asym stretch"),
+        (13, 3008.0, 3.0, 2.0, "E CH3 asym stretch"),
+        (14, 3334.0, 30.0, 4.0, "A1 sp C-H stretch"),
+    ]
+    modes = []
+    for idx, freq, ir, raman, sym in mode_data:
+        disps = [[round(random.gauss(0, 0.3), 3) for _ in range(3)] for _ in range(n)]
+        if "C#C" in sym:
+            disps[1] = [round(random.gauss(0, 0.7), 3), 0, 0]
+            disps[2] = [round(-random.gauss(0, 0.7), 3), 0, 0]
+        elif "sp C-H" in sym:
+            disps[3] = [round(random.gauss(0, 0.9), 3), 0, 0]
+        elif "CH3" in sym and "stretch" in sym:
+            for i in [4, 5, 6]:
+                disps[i] = [round(random.gauss(0, 0.8), 3) for _ in range(3)]
+        modes.append(make_mode(idx, freq, ir, raman, disps, sym))
+    return build_molecule("propyne", "Propyne", "C3H4", "CC#C", atoms, bonds, modes)
+
+
+def sulfur_hexafluoride():
+    """SF6 - Oh, 7 atoms, 15 modes. Octahedral, pedagogically important."""
+    d_sf = 1.564
+    atoms = [
+        make_atom("S", 0, 0, 0),          # 0: central S
+        make_atom("F", d_sf, 0, 0),        # 1: +x
+        make_atom("F", -d_sf, 0, 0),       # 2: -x
+        make_atom("F", 0, d_sf, 0),        # 3: +y
+        make_atom("F", 0, -d_sf, 0),       # 4: -y
+        make_atom("F", 0, 0, d_sf),        # 5: +z
+        make_atom("F", 0, 0, -d_sf),       # 6: -z
+    ]
+    bonds = [
+        make_bond(0, 1, 1), make_bond(0, 2, 1), make_bond(0, 3, 1),
+        make_bond(0, 4, 1), make_bond(0, 5, 1), make_bond(0, 6, 1),
+    ]
+    modes = [
+        # A1g: sym stretch (Raman only)
+        make_mode(0, 775.0, 0.0, 10.0, [
+            Z, [0.5, 0, 0], [-0.5, 0, 0], [0, 0.5, 0], [0, -0.5, 0], [0, 0, 0.5], [0, 0, -0.5]
+        ], "A1g sym stretch"),
+        # Eg: (Raman only, 2-fold)
+        make_mode(1, 643.0, 0.0, 5.0, [
+            Z, [0.5, 0, 0], [-0.5, 0, 0], [0, -0.5, 0], [0, 0.5, 0], Z, Z
+        ], "Eg stretch"),
+        make_mode(2, 643.0, 0.0, 5.0, [
+            Z, [0.29, 0, 0], [-0.29, 0, 0], [0, 0.29, 0], [0, -0.29, 0], [0, 0, -0.58], [0, 0, 0.58]
+        ], "Eg stretch"),
+        # T1u: asym stretch (IR only, 3-fold)
+        make_mode(3, 939.0, 100.0, 0.0, [
+            [0.3, 0, 0], [-0.6, 0, 0], [0.6, 0, 0], Z, Z, Z, Z
+        ], "T1u asym stretch"),
+        make_mode(4, 939.0, 100.0, 0.0, [
+            [0, 0.3, 0], Z, Z, [0, -0.6, 0], [0, 0.6, 0], Z, Z
+        ], "T1u asym stretch"),
+        make_mode(5, 939.0, 100.0, 0.0, [
+            [0, 0, 0.3], Z, Z, Z, Z, [0, 0, -0.6], [0, 0, 0.6]
+        ], "T1u asym stretch"),
+        # T1u: bend (IR only, 3-fold)
+        make_mode(6, 614.0, 40.0, 0.0, [
+            Z, [0, 0.5, 0], [0, -0.5, 0], [0, 0, 0.5], [0, 0, -0.5], Z, Z
+        ], "T1u bend"),
+        make_mode(7, 614.0, 40.0, 0.0, [
+            Z, [0, 0, 0.5], [0, 0, -0.5], Z, Z, [0.5, 0, 0], [-0.5, 0, 0]
+        ], "T1u bend"),
+        make_mode(8, 614.0, 40.0, 0.0, [
+            Z, Z, Z, [0.5, 0, 0], [-0.5, 0, 0], [0, 0.5, 0], [0, -0.5, 0]
+        ], "T1u bend"),
+        # T2g: (Raman only, 3-fold)
+        make_mode(9, 524.0, 0.0, 3.0, [
+            Z, [0, 0.5, 0], [0, 0.5, 0], [0.5, 0, 0], [0.5, 0, 0], Z, Z
+        ], "T2g bend"),
+        make_mode(10, 524.0, 0.0, 3.0, [
+            Z, [0, 0, 0.5], [0, 0, 0.5], Z, Z, [0.5, 0, 0], [0.5, 0, 0]
+        ], "T2g bend"),
+        make_mode(11, 524.0, 0.0, 3.0, [
+            Z, Z, Z, [0, 0, 0.5], [0, 0, 0.5], [0, 0.5, 0], [0, 0.5, 0]
+        ], "T2g bend"),
+        # T2u: (inactive, 3-fold)
+        make_mode(12, 348.0, 0.0, 0.0, [
+            Z, [0, 0.5, 0], [0, -0.5, 0], [-0.5, 0, 0], [0.5, 0, 0], Z, Z
+        ], "T2u bend"),
+        make_mode(13, 348.0, 0.0, 0.0, [
+            Z, [0, 0, 0.5], [0, 0, -0.5], Z, Z, [-0.5, 0, 0], [0.5, 0, 0]
+        ], "T2u bend"),
+        make_mode(14, 348.0, 0.0, 0.0, [
+            Z, Z, Z, [0, 0, 0.5], [0, 0, -0.5], [0, -0.5, 0], [0, 0.5, 0]
+        ], "T2u bend"),
+    ]
+    return build_molecule("sulfur_hexafluoride", "Sulfur Hexafluoride", "SF6", "FS(F)(F)(F)(F)F", atoms, bonds, modes)
+
+
+def toluene():
+    """C7H8 (methylbenzene) - Cs, 15 atoms, 39 modes."""
+    # Benzene ring in xy plane, C1 at origin with methyl on -x
+    d_cc_ar = 1.395  # aromatic C-C
+    d_ch_ar = 1.08   # aromatic C-H
+    d_cc_me = 1.51   # C(ring)-CH3
+    d_ch_me = 1.09   # methyl C-H
+
+    # Ring carbons (hexagon centered around slight offset)
+    ring_angles = [i * 60 for i in range(6)]
+    ring_atoms = []
+    for i, ang in enumerate(ring_angles):
+        rad = math.radians(ang)
+        ring_atoms.append(make_atom("C", d_cc_ar * math.cos(rad), d_cc_ar * math.sin(rad), 0))
+
+    # Methyl carbon bonded to ring C at index 0 (the one at +x)
+    atoms = ring_atoms[:]  # 0-5: ring carbons
+    # CH3 carbon along +x from C0
+    me_x = atoms[0]["x"] + d_cc_me
+    atoms.append(make_atom("C", me_x, 0, 0))  # 6: methyl C
+
+    # Aromatic H's on ring C1-C5 (not C0 which has CH3)
+    for i in range(1, 6):
+        cx, cy = atoms[i]["x"], atoms[i]["y"]
+        dist = math.sqrt(cx**2 + cy**2)
+        hx = cx + d_ch_ar * cx / dist
+        hy = cy + d_ch_ar * cy / dist
+        atoms.append(make_atom("H", hx, hy, 0))  # 7-11
+
+    # Methyl H's
+    atoms.append(make_atom("H", me_x + d_ch_me, 0, 0))                          # 12
+    atoms.append(make_atom("H", me_x - d_ch_me * 0.5, d_ch_me * 0.87, 0))      # 13
+    atoms.append(make_atom("H", me_x - d_ch_me * 0.5, -d_ch_me * 0.87, 0))     # 14
+
+    bonds = [
+        # Ring bonds (aromatic ~ order 2 for display)
+        make_bond(0, 1, 2), make_bond(1, 2, 1), make_bond(2, 3, 2),
+        make_bond(3, 4, 1), make_bond(4, 5, 2), make_bond(5, 0, 1),
+        # C0 - CH3
+        make_bond(0, 6, 1),
+        # Ring C-H
+        make_bond(1, 7, 1), make_bond(2, 8, 1), make_bond(3, 9, 1),
+        make_bond(4, 10, 1), make_bond(5, 11, 1),
+        # Methyl C-H
+        make_bond(6, 12, 1), make_bond(6, 13, 1), make_bond(6, 14, 1),
+    ]
+
+    n = 15
+    import random
+    random.seed(104)
+    mode_data = [
+        (0, 217.0, 0.5, 0.1, "A'' CH3 torsion"),
+        (1, 344.0, 1.0, 0.3, "A' ring-CH3 bend"),
+        (2, 404.0, 2.0, 0.2, "A'' ring oop"),
+        (3, 467.0, 3.0, 0.5, "A' ring bend"),
+        (4, 521.0, 2.0, 0.3, "A'' ring oop"),
+        (5, 623.0, 5.0, 0.2, "A' ring bend"),
+        (6, 694.0, 10.0, 0.1, "A'' ring oop"),
+        (7, 728.0, 15.0, 0.3, "A'' CH oop"),
+        (8, 785.0, 8.0, 0.4, "A'' CH oop"),
+        (9, 843.0, 3.0, 1.0, "A' ring breathing"),
+        (10, 893.0, 2.0, 0.2, "A'' CH oop"),
+        (11, 960.0, 1.0, 0.1, "A'' CH oop"),
+        (12, 1003.0, 0.5, 5.0, "A' ring breathing"),
+        (13, 1030.0, 5.0, 3.0, "A' C-CH3 stretch"),
+        (14, 1040.0, 3.0, 0.8, "A' CH ip bend"),
+        (15, 1080.0, 4.0, 0.6, "A' CH ip bend"),
+        (16, 1155.0, 2.0, 0.4, "A' CH ip bend"),
+        (17, 1175.0, 3.0, 0.5, "A' CH ip bend"),
+        (18, 1211.0, 5.0, 1.0, "A' CH ip bend"),
+        (19, 1265.0, 2.0, 0.3, "A' ring stretch"),
+        (20, 1334.0, 1.0, 0.5, "A' ring stretch"),
+        (21, 1379.0, 3.0, 1.5, "A' CH3 sym bend"),
+        (22, 1448.0, 4.0, 0.8, "A' CH3 asym bend"),
+        (23, 1460.0, 5.0, 1.0, "A' CH3 asym bend"),
+        (24, 1495.0, 8.0, 0.6, "A' ring stretch"),
+        (25, 1586.0, 10.0, 3.0, "A' ring stretch (8a)"),
+        (26, 1605.0, 12.0, 5.0, "A' ring stretch (8b)"),
+        (27, 2870.0, 3.0, 4.0, "A' CH3 sym stretch"),
+        (28, 2921.0, 2.0, 2.0, "A' CH3 asym stretch"),
+        (29, 2951.0, 4.0, 2.5, "A' CH3 asym stretch"),
+        (30, 3026.0, 2.0, 6.0, "A' ring CH stretch"),
+        (31, 3039.0, 3.0, 4.0, "A' ring CH stretch"),
+        (32, 3047.0, 1.5, 3.5, "A' ring CH stretch"),
+        (33, 3055.0, 2.0, 3.0, "A' ring CH stretch"),
+        (34, 3063.0, 1.0, 2.5, "A' ring CH stretch"),
+        (35, 408.0, 1.0, 0.15, "A' ring bend"),
+        (36, 550.0, 2.0, 0.2, "A'' ring-CH3 oop"),
+        (37, 742.0, 20.0, 0.1, "A'' ring oop"),
+        (38, 975.0, 0.5, 0.1, "A'' ring oop"),
+    ]
+    modes = []
+    for idx, freq, ir, raman, sym in mode_data:
+        disps = [[round(random.gauss(0, 0.25), 3) for _ in range(3)] for _ in range(n)]
+        if "ring CH stretch" in sym:
+            for i in [7, 8, 9, 10, 11]:
+                disps[i] = [round(random.gauss(0, 0.8), 3) for _ in range(3)]
+        elif "CH3" in sym and "stretch" in sym:
+            for i in [12, 13, 14]:
+                disps[i] = [round(random.gauss(0, 0.8), 3) for _ in range(3)]
+        elif "ring stretch" in sym or "ring breathing" in sym:
+            for i in range(6):
+                disps[i] = [round(random.gauss(0, 0.6), 3) for _ in range(3)]
+        elif "C-CH3" in sym:
+            disps[0] = [round(random.gauss(0, 0.5), 3), 0, 0]
+            disps[6] = [round(-random.gauss(0, 0.5), 3), 0, 0]
+        modes.append(make_mode(idx, freq, ir, raman, disps, sym))
+    return build_molecule("toluene", "Toluene", "C7H8", "Cc1ccccc1", atoms, bonds, modes)
+
+
 # ============================================================
 # Main
 # ============================================================
@@ -619,6 +1402,11 @@ def main():
         boron_trifluoride, carbon_tetrachloride, nitrous_oxide,
         formic_acid, acetic_acid, dimethyl_ether,
         methylamine, urea, glycine,
+        # New molecules
+        acetone, ethylene, allene, chloroform,
+        nitrogen_dioxide, ozone, cyanogen, methyl_fluoride,
+        nitric_acid, hydrazine, propyne,
+        sulfur_hexafluoride, toluene,
     ]
 
     for gen in generators:

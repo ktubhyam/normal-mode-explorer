@@ -96,7 +96,7 @@ export function MoleculePicker() {
               className="w-full bg-surface-2 border border-border rounded-md px-2.5 py-1.5 text-sm font-mono text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-accent"
             />
           </div>
-          <div className="max-h-72 overflow-y-auto py-1">
+          <div className="max-h-[min(18rem,60dvh)] overflow-y-auto py-1">
             {filtered.length === 0 ? (
               <div className="px-3 py-4 text-center text-foreground/30 text-sm">
                 No molecules found

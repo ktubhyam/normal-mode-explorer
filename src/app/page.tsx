@@ -107,7 +107,7 @@ export default function Page() {
         </div>
 
         {/* Analysis panels */}
-        <aside className="w-full lg:w-[420px] border-t lg:border-t-0 lg:border-l border-border bg-surface/30 lg:overflow-y-auto shrink-0">
+        <aside className="w-full lg:w-[420px] border-t lg:border-t-0 lg:border-l border-border bg-surface/30 lg:overflow-y-auto shrink-0 pb-[env(safe-area-inset-bottom)]">
           <div className="p-2 space-y-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <ModeList />
@@ -133,7 +133,7 @@ export default function Page() {
           </div>
 
           <div className="hidden lg:block px-3 py-2 border-t border-border">
-            <div className="text-[9px] font-mono text-foreground/20 space-y-0.5">
+            <div className="text-[10px] font-mono text-foreground/20 space-y-0.5">
               <div>Space — play/pause</div>
               <div>↑↓ — cycle mode A</div>
               <div>←→ — cycle mode B</div>
