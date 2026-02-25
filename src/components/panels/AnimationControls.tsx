@@ -14,9 +14,13 @@ export function AnimationControls() {
   const showArrows = useExplorerStore((s) => s.showArrows);
   const showTrails = useExplorerStore((s) => s.showTrails);
   const showSymmetryElements = useExplorerStore((s) => s.showSymmetryElements);
+  const showLabels = useExplorerStore((s) => s.showLabels);
+  const showGrid = useExplorerStore((s) => s.showGrid);
   const toggleArrows = useExplorerStore((s) => s.toggleArrows);
   const toggleTrails = useExplorerStore((s) => s.toggleTrails);
   const toggleSymmetryElements = useExplorerStore((s) => s.toggleSymmetryElements);
+  const toggleLabels = useExplorerStore((s) => s.toggleLabels);
+  const toggleGrid = useExplorerStore((s) => s.toggleGrid);
 
   return (
     <TerminalPanel title="Animation">
@@ -82,6 +86,8 @@ export function AnimationControls() {
           <div className="text-[9px] font-mono text-foreground/30 mb-1">Display</div>
           <ToggleButton active={showArrows} onClick={toggleArrows} label="Arrows" />
           <ToggleButton active={showTrails} onClick={toggleTrails} label="Trails" />
+          <ToggleButton active={showLabels} onClick={toggleLabels} label="Labels" />
+          <ToggleButton active={showGrid} onClick={toggleGrid} label="Grid" />
           <ToggleButton active={showSymmetryElements} onClick={toggleSymmetryElements} label="Symmetry" />
         </div>
       </div>

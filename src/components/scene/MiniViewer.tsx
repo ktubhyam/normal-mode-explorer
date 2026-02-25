@@ -1,15 +1,18 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 import { Atoms } from "./Atoms";
 import { Bonds } from "./Bonds";
 import { DisplacementArrows } from "./DisplacementArrows";
 import { TrajectoryTrails } from "./TrajectoryTrails";
 import { SymmetryElements } from "./SymmetryElements";
+import { SceneEffects } from "./SceneEffects";
+import { GridFloor } from "./GridFloor";
 import { MOLECULE_SYMMETRY } from "@/lib/constants";
+import { useExplorerStore } from "@/lib/store";
 import type { MoleculeData } from "@/lib/types";
 
 function CameraFit({ molecule }: { molecule: MoleculeData }) {
@@ -26,9 +29,13 @@ function CameraFit({ molecule }: { molecule: MoleculeData }) {
     box.getBoundingSphere(sphere);
 
     const radius = Math.max(sphere.radius, 0.8);
-    const dist = radius * 2.2;
+    const dist = radius * 2.4;
 
-    camera.position.set(dist * 0.5, dist * 0.3, dist);
+    camera.position.set(
+      sphere.center.x + dist * 0.3,
+      sphere.center.y + dist * 0.15,
+      sphere.center.z + dist
+    );
     camera.lookAt(sphere.center);
     camera.updateProjectionMatrix();
   }, [molecule, camera]);
@@ -44,11 +51,14 @@ interface Props {
 }
 
 export function MiniViewer({ molecule, modeIndex, label, accentColor }: Props) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const mode = molecule.modes[modeIndex];
   if (!mode) return null;
 
   const symmetryData = MOLECULE_SYMMETRY[molecule.name.toLowerCase().replace(/\s+/g, "_")];
   const symmetryLabel = symmetryData?.modeLabels[modeIndex] || mode.symmetry || "—";
+  const modeDescription = symmetryData?.modeDescriptions?.[modeIndex] || "";
   const pointGroup = symmetryData?.pointGroup || molecule.pointGroup || "";
 
   const irActive = mode.ir_intensity > 0.1;
@@ -61,39 +71,69 @@ export function MiniViewer({ molecule, modeIndex, label, accentColor }: Props) {
         ? "Raman"
         : "Silent";
 
+  // Molecule center for OrbitControls target
+  let cx = 0, cy = 0, cz = 0;
+  for (const a of molecule.atoms) { cx += a.x; cy += a.y; cz += a.z; }
+  const n = molecule.atoms.length;
+  const target: [number, number, number] = [cx / n, cy / n, cz / n];
+
+  // Lowest atom y for contact shadow placement
+  let minY = Infinity;
+  for (const a of molecule.atoms) { if (a.y < minY) minY = a.y; }
+
+  // Screenshot handler
+  const handleScreenshot = useCallback(() => {
+    const canvas = containerRef.current?.querySelector("canvas");
+    if (!canvas) return;
+    const link = document.createElement("a");
+    link.download = `${molecule.name}-mode${modeIndex + 1}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  }, [molecule.name, modeIndex]);
+
+  // Fullscreen handler
+  const handleFullscreen = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      el.requestFullscreen();
+    }
+  }, []);
+
   return (
-    <div className="flex-1 flex flex-col min-h-0">
-      {/* Mode header */}
+    <div ref={containerRef} className="flex-1 flex flex-col min-h-0 relative">
+      {/* Mode header — overlaid on mobile, static on desktop */}
       <div
-        className="flex items-center justify-between px-3 py-2 border-b"
+        className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 bg-background/80 backdrop-blur-sm border-b lg:relative lg:bg-transparent lg:backdrop-blur-none"
         style={{ borderColor: `${accentColor}33` }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
           <span
-            className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded"
+            className="text-[9px] sm:text-[10px] font-mono font-bold px-1 sm:px-1.5 py-0.5 rounded shrink-0"
             style={{ background: `${accentColor}22`, color: accentColor }}
           >
             {label}
           </span>
-          <span className="text-sm font-mono text-foreground">
-            ν = {mode.frequency.toFixed(0)} cm⁻¹
+          <span className="text-xs sm:text-sm font-mono text-foreground shrink-0">
+            {mode.frequency.toFixed(0)} cm⁻¹
           </span>
-          <span className="text-[10px] font-mono text-foreground/30">
-            μ = {(molecule.atoms.reduce((sum, atom, i) => {
-              const d = mode.displacements[i];
-              return sum + atom.mass * (d[0] ** 2 + d[1] ** 2 + d[2] ** 2);
-            }, 0) / mode.displacements.reduce((sum, d) => sum + d[0] ** 2 + d[1] ** 2 + d[2] ** 2, 0) || 0).toFixed(2)} amu
-          </span>
+          {modeDescription && (
+            <span className="hidden md:inline text-[9px] font-mono text-foreground/40 truncate">
+              {modeDescription}
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-2 text-[10px] font-mono">
+        <div className="flex items-center gap-1 sm:gap-2 text-[9px] sm:text-[10px] font-mono shrink-0">
           {symmetryLabel !== "—" && (
-            <span className="text-foreground/60">{symmetryLabel}</span>
+            <span className="hidden sm:inline text-foreground/60">{symmetryLabel}</span>
           )}
           {pointGroup && (
             <span className="text-foreground/40">{pointGroup}</span>
           )}
           <span
-            className="px-1.5 py-0.5 rounded"
+            className="px-1 sm:px-1.5 py-0.5 rounded"
             style={{ background: `${accentColor}15`, color: `${accentColor}cc` }}
           >
             {activityStr}
@@ -102,15 +142,16 @@ export function MiniViewer({ molecule, modeIndex, label, accentColor }: Props) {
       </div>
 
       {/* 3D Canvas */}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 relative">
         <Canvas
           camera={{ position: [0, 0, 6], fov: 50, near: 0.1, far: 100 }}
-          gl={{ antialias: true, alpha: true }}
+          gl={{ antialias: true, alpha: true, preserveDrawingBuffer: true }}
         >
-          <color attach="background" args={["#050505"]} />
-          <ambientLight intensity={0.6} />
-          <directionalLight position={[5, 5, 5]} intensity={0.8} />
+          <color attach="background" args={["#030308"]} />
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[5, 5, 5]} intensity={0.9} />
           <directionalLight position={[-3, -3, 2]} intensity={0.3} />
+          <pointLight position={[0, 3, 0]} intensity={0.2} color="#00D8FF" />
 
           <CameraFit molecule={molecule} />
           <Atoms molecule={molecule} modeIndex={modeIndex} />
@@ -118,9 +159,54 @@ export function MiniViewer({ molecule, modeIndex, label, accentColor }: Props) {
           <DisplacementArrows molecule={molecule} modeIndex={modeIndex} color={accentColor} />
           <TrajectoryTrails molecule={molecule} modeIndex={modeIndex} />
           <SymmetryElements molecule={molecule} />
+          <GridFloor molecule={molecule} />
 
-          <OrbitControls enableDamping dampingFactor={0.1} minDistance={2} maxDistance={20} />
+          {/* Contact shadow under molecule */}
+          <ContactShadows
+            position={[0, minY - 1.2, 0]}
+            opacity={0.3}
+            scale={8}
+            blur={2}
+            far={4}
+            color="#000000"
+          />
+
+          <SceneEffects />
+
+          <OrbitControls
+            enableDamping
+            dampingFactor={0.1}
+            minDistance={1}
+            maxDistance={20}
+            target={target}
+            autoRotate
+            autoRotateSpeed={0.5}
+          />
         </Canvas>
+
+        {/* Overlay buttons — screenshot + fullscreen */}
+        <div className="absolute bottom-2 right-2 flex gap-1.5 z-10">
+          <button
+            onClick={handleScreenshot}
+            className="w-7 h-7 flex items-center justify-center rounded bg-surface/60 backdrop-blur-sm border border-border/50 text-foreground/40 hover:text-foreground/80 hover:border-border-bright transition-colors"
+            title="Screenshot"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="M21 15l-5-5L5 21" />
+            </svg>
+          </button>
+          <button
+            onClick={handleFullscreen}
+            className="w-7 h-7 flex items-center justify-center rounded bg-surface/60 backdrop-blur-sm border border-border/50 text-foreground/40 hover:text-foreground/80 hover:border-border-bright transition-colors"
+            title="Fullscreen"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   );

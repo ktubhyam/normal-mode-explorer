@@ -41,14 +41,42 @@ export const DEFAULT_SPEED = 1.0;
 /** Visual frequency for animation (Hz) */
 export const VISUAL_FREQ = 1.5;
 
-/** Known point groups and symmetry labels for common molecules */
-export const MOLECULE_SYMMETRY: Record<string, { pointGroup: string; modeLabels: string[] }> = {
-  water: { pointGroup: "C₂ᵥ", modeLabels: ["A₁", "A₁", "B₂"] },
-  ammonia: { pointGroup: "C₃ᵥ", modeLabels: ["A₁", "E", "E", "A₁", "E", "E"] },
-  methane: { pointGroup: "Tᵈ", modeLabels: ["A₁", "E", "E", "T₂", "T₂", "T₂", "T₂", "T₂", "T₂"] },
-  formaldehyde: { pointGroup: "C₂ᵥ", modeLabels: ["A₁", "A₁", "A₁", "B₁", "B₂", "B₂"] },
+/** Known point groups, symmetry labels, and mode descriptions for common molecules */
+export const MOLECULE_SYMMETRY: Record<string, {
+  pointGroup: string;
+  modeLabels: string[];
+  modeDescriptions?: string[];
+}> = {
+  water: {
+    pointGroup: "C₂ᵥ",
+    modeLabels: ["A₁", "A₁", "B₂"],
+    modeDescriptions: ["Symmetric stretch", "Bending", "Asymmetric stretch"],
+  },
+  ammonia: {
+    pointGroup: "C₃ᵥ",
+    modeLabels: ["A₁", "E", "E", "A₁", "E", "E"],
+    modeDescriptions: ["Symmetric stretch", "Degenerate deformation", "Degenerate deformation", "Symmetric deformation", "Degenerate stretch", "Degenerate stretch"],
+  },
+  methane: {
+    pointGroup: "Tᵈ",
+    modeLabels: ["A₁", "E", "E", "T₂", "T₂", "T₂", "T₂", "T₂", "T₂"],
+    modeDescriptions: ["Symmetric stretch", "Degenerate deformation", "Degenerate deformation", "Asymmetric stretch", "Asymmetric stretch", "Asymmetric stretch", "Degenerate deformation", "Degenerate deformation", "Degenerate deformation"],
+  },
+  formaldehyde: {
+    pointGroup: "C₂ᵥ",
+    modeLabels: ["A₁", "A₁", "A₁", "B₁", "B₂", "B₂"],
+    modeDescriptions: ["C-H symmetric stretch", "C=O stretch", "CH₂ scissoring", "Out-of-plane wag", "C-H asymmetric stretch", "CH₂ rocking"],
+  },
   benzene: { pointGroup: "D₆ₕ", modeLabels: [] },
-  acetylene: { pointGroup: "D∞ₕ", modeLabels: ["Σᵍ⁺", "Σᵍ⁺", "Σᵤ⁺", "Πᵍ", "Πᵍ", "Πᵤ", "Πᵤ"] },
-  hydrogen_cyanide: { pointGroup: "C∞ᵥ", modeLabels: ["Σ⁺", "Σ⁺", "Π", "Π"] },
+  acetylene: {
+    pointGroup: "D∞ₕ",
+    modeLabels: ["Σᵍ⁺", "Σᵍ⁺", "Σᵤ⁺", "Πᵍ", "Πᵍ", "Πᵤ", "Πᵤ"],
+    modeDescriptions: ["Symmetric C-H stretch", "C≡C stretch", "Asymmetric C-H stretch", "Symmetric bend", "Symmetric bend", "Asymmetric bend", "Asymmetric bend"],
+  },
+  hydrogen_cyanide: {
+    pointGroup: "C∞ᵥ",
+    modeLabels: ["Σ⁺", "Σ⁺", "Π", "Π"],
+    modeDescriptions: ["C-H stretch", "C≡N stretch", "Bending", "Bending"],
+  },
   ethane: { pointGroup: "D₃ᵈ", modeLabels: [] },
 };

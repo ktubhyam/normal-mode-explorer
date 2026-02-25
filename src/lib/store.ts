@@ -41,9 +41,17 @@ interface ExplorerStore {
   showArrows: boolean;
   showTrails: boolean;
   showSymmetryElements: boolean;
+  showLabels: boolean;
+  showGrid: boolean;
   toggleArrows: () => void;
   toggleTrails: () => void;
   toggleSymmetryElements: () => void;
+  toggleLabels: () => void;
+  toggleGrid: () => void;
+
+  // Fullscreen
+  isFullscreen: boolean;
+  setFullscreen: (fs: boolean) => void;
 
   // Temperature (Kelvin) for Boltzmann distribution
   temperature: number;
@@ -105,10 +113,17 @@ export const useExplorerStore = create<ExplorerStore>((set) => ({
   showArrows: true,
   showTrails: false,
   showSymmetryElements: false,
+  showLabels: true,
+  showGrid: true,
   toggleArrows: () => set((s) => ({ showArrows: !s.showArrows })),
   toggleTrails: () => set((s) => ({ showTrails: !s.showTrails })),
   toggleSymmetryElements: () =>
     set((s) => ({ showSymmetryElements: !s.showSymmetryElements })),
+  toggleLabels: () => set((s) => ({ showLabels: !s.showLabels })),
+  toggleGrid: () => set((s) => ({ showGrid: !s.showGrid })),
+
+  isFullscreen: false,
+  setFullscreen: (fs) => set({ isFullscreen: fs }),
 
   temperature: 300,
   setTemperature: (temp) => set({ temperature: temp }),
