@@ -31,9 +31,9 @@ export function MobileModeStrip() {
       <button
         onClick={() => setModeA(Math.max(0, modeA - 1))}
         disabled={modeA === 0}
-        className="w-6 h-6 flex items-center justify-center rounded bg-surface-2 border border-border text-foreground/50 disabled:opacity-20"
+        className="w-9 h-9 flex items-center justify-center rounded bg-surface-2 border border-border text-foreground/50 disabled:opacity-20"
       >
-        <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+        <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
           <path d="M8 2L4 6L8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </button>
@@ -65,15 +65,15 @@ export function MobileModeStrip() {
       {/* Play/Pause */}
       <button
         onClick={togglePlaying}
-        className="w-6 h-6 flex items-center justify-center rounded bg-surface-2 border border-border text-foreground/50"
+        className="w-9 h-9 flex items-center justify-center rounded bg-surface-2 border border-border text-foreground/50"
       >
         {isPlaying ? (
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <rect x="6" y="4" width="4" height="16" rx="1" />
             <rect x="14" y="4" width="4" height="16" rx="1" />
           </svg>
         ) : (
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <polygon points="5,3 19,12 5,21" />
           </svg>
         )}
@@ -83,9 +83,9 @@ export function MobileModeStrip() {
       <button
         onClick={() => setModeA(Math.min(maxMode, modeA + 1))}
         disabled={modeA === maxMode}
-        className="w-6 h-6 flex items-center justify-center rounded bg-surface-2 border border-border text-foreground/50 disabled:opacity-20"
+        className="w-9 h-9 flex items-center justify-center rounded bg-surface-2 border border-border text-foreground/50 disabled:opacity-20"
       >
-        <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+        <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
           <path d="M4 2L8 6L4 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </button>
