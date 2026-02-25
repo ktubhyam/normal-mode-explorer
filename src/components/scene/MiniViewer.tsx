@@ -29,7 +29,7 @@ function CameraFit({ molecule }: { molecule: MoleculeData }) {
     box.getBoundingSphere(sphere);
 
     const radius = Math.max(sphere.radius, 0.8);
-    const dist = radius * 2.4;
+    const dist = radius * 3.2;
 
     // Straight-on view — no vertical offset so molecule stays centered on mobile
     camera.position.set(
