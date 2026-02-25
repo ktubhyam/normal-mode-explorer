@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useExplorerStore } from "@/lib/store";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { Header } from "@/components/Header";
+import { MobileModeStrip } from "@/components/MobileModeStrip";
 import { ModeList } from "@/components/panels/ModeList";
 import { SelectionRules } from "@/components/panels/SelectionRules";
 import { AnimationControls } from "@/components/panels/AnimationControls";
@@ -62,11 +63,12 @@ export default function Page() {
     <div className="h-screen flex flex-col">
       <DataLoader />
       <Header />
+      <MobileModeStrip />
 
       {/* Mobile: vertical scroll | Desktop: side-by-side */}
       <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden">
-        {/* 3D viewer — fixed height on mobile, flex on desktop */}
-        <div className="h-[50vh] lg:h-auto lg:flex-1 flex flex-col min-w-0 shrink-0">
+        {/* 3D viewer — fills remaining space on mobile after header+strip, flex on desktop */}
+        <div className="h-[60vh] lg:h-auto lg:flex-1 flex flex-col min-w-0 shrink-0">
           <div className="flex-1 min-h-0">
             <ComparisonView />
           </div>

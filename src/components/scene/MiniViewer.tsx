@@ -105,36 +105,36 @@ export function MiniViewer({ molecule, modeIndex, label, accentColor }: Props) {
 
   return (
     <div ref={containerRef} className="flex-1 flex flex-col min-h-0 relative">
-      {/* Mode header */}
+      {/* Mode header — hidden on mobile (MobileModeStrip shows instead) */}
       <div
-        className="shrink-0 flex items-center justify-between px-2 sm:px-3 py-1 sm:py-2 border-b"
+        className="hidden lg:flex shrink-0 items-center justify-between px-3 py-2 border-b"
         style={{ borderColor: `${accentColor}33` }}
       >
-        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
           <span
-            className="text-[9px] sm:text-[10px] font-mono font-bold px-1 sm:px-1.5 py-0.5 rounded shrink-0"
+            className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shrink-0"
             style={{ background: `${accentColor}22`, color: accentColor }}
           >
             {label}
           </span>
-          <span className="text-xs sm:text-sm font-mono text-foreground shrink-0">
+          <span className="text-sm font-mono text-foreground shrink-0">
             {mode.frequency.toFixed(0)} cm⁻¹
           </span>
           {modeDescription && (
-            <span className="hidden md:inline text-[9px] font-mono text-foreground/40 truncate">
+            <span className="text-[9px] font-mono text-foreground/40 truncate">
               {modeDescription}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1 sm:gap-2 text-[9px] sm:text-[10px] font-mono shrink-0">
+        <div className="flex items-center gap-2 text-[10px] font-mono shrink-0">
           {symmetryLabel !== "—" && (
-            <span className="hidden sm:inline text-foreground/60">{symmetryLabel}</span>
+            <span className="text-foreground/60">{symmetryLabel}</span>
           )}
           {pointGroup && (
             <span className="text-foreground/40">{pointGroup}</span>
           )}
           <span
-            className="px-1 sm:px-1.5 py-0.5 rounded"
+            className="px-1.5 py-0.5 rounded"
             style={{ background: `${accentColor}15`, color: `${accentColor}cc` }}
           >
             {activityStr}
