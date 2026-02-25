@@ -1,6 +1,25 @@
 import { create } from "zustand";
 import type { MoleculeData, MoleculeManifestEntry } from "./types";
 
+function getURLState(): {
+  moleculeId?: string;
+  modeA?: number;
+  modeB?: number | null;
+} {
+  if (typeof window === "undefined") return {};
+  const params = new URLSearchParams(window.location.search);
+  const mol = params.get("mol");
+  const mode = params.get("mode");
+  const modeB = params.get("modeB");
+  return {
+    ...(mol ? { moleculeId: mol } : {}),
+    ...(mode ? { modeA: parseInt(mode, 10) } : {}),
+    ...(modeB ? { modeB: parseInt(modeB, 10) } : {}),
+  };
+}
+
+const urlState = getURLState();
+
 interface ExplorerStore {
   // Manifest
   manifest: MoleculeManifestEntry[];
@@ -62,7 +81,7 @@ export const useExplorerStore = create<ExplorerStore>((set) => ({
   manifest: [],
   setManifest: (entries) => set({ manifest: entries }),
 
-  moleculeId: "water",
+  moleculeId: urlState.moleculeId ?? "water",
   molecule: null,
   loading: false,
   error: null,
@@ -79,8 +98,8 @@ export const useExplorerStore = create<ExplorerStore>((set) => ({
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
 
-  modeA: 0,
-  modeB: null,
+  modeA: urlState.modeA ?? 0,
+  modeB: urlState.modeB ?? null,
   setModeA: (index) => set({ modeA: index }),
   setModeB: (index) => set({ modeB: index }),
 

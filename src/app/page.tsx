@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useExplorerStore } from "@/lib/store";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { Header } from "@/components/Header";
@@ -24,6 +24,30 @@ const ComparisonView = dynamic(
     })),
   { ssr: false },
 );
+
+function URLSync() {
+  const moleculeId = useExplorerStore((s) => s.moleculeId);
+  const modeA = useExplorerStore((s) => s.modeA);
+  const modeB = useExplorerStore((s) => s.modeB);
+  const initialized = useRef(false);
+
+  useEffect(() => {
+    // Skip the first render to avoid overwriting URL before manifest loads
+    if (!initialized.current) {
+      initialized.current = true;
+      return;
+    }
+    const params = new URLSearchParams();
+    params.set("mol", moleculeId);
+    if (modeA !== 0) params.set("mode", String(modeA));
+    if (modeB !== null) params.set("modeB", String(modeB));
+    const search = params.toString();
+    const url = search ? `?${search}` : window.location.pathname;
+    window.history.replaceState(null, "", url);
+  }, [moleculeId, modeA, modeB]);
+
+  return null;
+}
 
 function DataLoader() {
   const moleculeId = useExplorerStore((s) => s.moleculeId);
@@ -70,6 +94,7 @@ export default function Page() {
   return (
     <div className="h-screen flex flex-col">
       <DataLoader />
+      <URLSync />
       <Header />
       <MobileModeStrip />
 
