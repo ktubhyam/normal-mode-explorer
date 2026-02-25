@@ -25,10 +25,10 @@ function CameraFit({ molecule }: { molecule: MoleculeData }) {
     const sphere = new THREE.Sphere();
     box.getBoundingSphere(sphere);
 
-    const radius = Math.max(sphere.radius, 1.5);
-    const dist = radius * 3.2;
+    const radius = Math.max(sphere.radius, 0.8);
+    const dist = radius * 2.2;
 
-    camera.position.set(dist * 0.6, dist * 0.4, dist);
+    camera.position.set(dist * 0.5, dist * 0.3, dist);
     camera.lookAt(sphere.center);
     camera.updateProjectionMatrix();
   }, [molecule, camera]);
