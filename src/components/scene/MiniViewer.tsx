@@ -105,9 +105,9 @@ export function MiniViewer({ molecule, modeIndex, label, accentColor }: Props) {
 
   return (
     <div ref={containerRef} className="flex-1 flex flex-col min-h-0 relative">
-      {/* Mode header — overlaid on mobile, static on desktop */}
+      {/* Mode header */}
       <div
-        className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 bg-background/80 backdrop-blur-sm border-b lg:relative lg:bg-transparent lg:backdrop-blur-none"
+        className="shrink-0 flex items-center justify-between px-2 sm:px-3 py-1 sm:py-2 border-b"
         style={{ borderColor: `${accentColor}33` }}
       >
         <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
