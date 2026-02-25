@@ -11,6 +11,13 @@ export function AnimationControls() {
   const setSpeed = useExplorerStore((s) => s.setSpeed);
   const setAmplitude = useExplorerStore((s) => s.setAmplitude);
 
+  const showArrows = useExplorerStore((s) => s.showArrows);
+  const showTrails = useExplorerStore((s) => s.showTrails);
+  const showSymmetryElements = useExplorerStore((s) => s.showSymmetryElements);
+  const toggleArrows = useExplorerStore((s) => s.toggleArrows);
+  const toggleTrails = useExplorerStore((s) => s.toggleTrails);
+  const toggleSymmetryElements = useExplorerStore((s) => s.toggleSymmetryElements);
+
   return (
     <TerminalPanel title="Animation">
       <div className="p-3 space-y-3">
@@ -69,7 +76,35 @@ export function AnimationControls() {
             onChange={(e) => setAmplitude(parseFloat(e.target.value))}
           />
         </div>
+
+        {/* Visual toggles */}
+        <div className="border-t border-border pt-2 space-y-1.5">
+          <div className="text-[9px] font-mono text-foreground/30 mb-1">Display</div>
+          <ToggleButton active={showArrows} onClick={toggleArrows} label="Arrows" />
+          <ToggleButton active={showTrails} onClick={toggleTrails} label="Trails" />
+          <ToggleButton active={showSymmetryElements} onClick={toggleSymmetryElements} label="Symmetry" />
+        </div>
       </div>
     </TerminalPanel>
+  );
+}
+
+function ToggleButton({ active, onClick, label }: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center justify-between px-2 py-1 rounded text-[10px] font-mono transition-colors ${
+        active
+          ? "bg-cyan/10 text-cyan border border-cyan/30"
+          : "bg-surface-2 text-foreground/40 border border-border hover:border-border-bright hover:text-foreground/60"
+      }`}
+    >
+      <span>{label}</span>
+      <span className="text-[8px]">{active ? "ON" : "OFF"}</span>
+    </button>
   );
 }

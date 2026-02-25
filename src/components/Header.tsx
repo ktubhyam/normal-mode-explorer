@@ -13,7 +13,7 @@ export function Header() {
   const pointGroup = symmetryData?.pointGroup || molecule?.pointGroup || "";
 
   return (
-    <header className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-surface/50 backdrop-blur-sm">
+    <header className="relative z-50 flex items-center justify-between px-4 py-2.5 border-b border-border bg-surface/50 backdrop-blur-sm">
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-cyan shadow-[0_0_8px_var(--cyan)]" />

@@ -9,6 +9,10 @@ import { ModeList } from "@/components/panels/ModeList";
 import { SelectionRules } from "@/components/panels/SelectionRules";
 import { AnimationControls } from "@/components/panels/AnimationControls";
 import { SymmetryInfo } from "@/components/panels/SymmetryInfo";
+import { SpectrumChart } from "@/components/panels/SpectrumChart";
+import { BoltzmannPanel } from "@/components/panels/BoltzmannPanel";
+import { DisplacementTable } from "@/components/panels/DisplacementTable";
+import { Sonification } from "@/components/panels/Sonification";
 import { EnergyChart } from "@/components/panels/EnergyChart";
 import type { MoleculeData, MoleculeManifestEntry } from "@/lib/types";
 
@@ -62,26 +66,42 @@ export default function Page() {
       <Header />
 
       <div className="flex-1 flex min-h-0">
-        {/* Main content: 3D viewers + energy chart */}
+        {/* Left: 3D viewer(s) — ~55% */}
         <div className="flex-1 flex flex-col min-h-0 min-w-0">
-          {/* 3D comparison viewports */}
           <div className="flex-1 min-h-0">
             <ComparisonView />
           </div>
-
-          {/* Energy distribution chart */}
-          <div className="border-t border-border shrink-0">
-            <EnergyChart />
-          </div>
         </div>
 
-        {/* Sidebar */}
-        <aside className="w-72 border-l border-border bg-surface/30 overflow-y-auto shrink-0">
+        {/* Right: Analysis panels — scrollable dashboard */}
+        <aside className="w-[420px] border-l border-border bg-surface/30 overflow-y-auto shrink-0">
           <div className="p-2 space-y-2">
-            <ModeList />
-            <SelectionRules />
-            <AnimationControls />
-            <SymmetryInfo />
+            {/* Row 1: Mode list + Animation controls side by side */}
+            <div className="grid grid-cols-2 gap-2">
+              <ModeList />
+              <div className="space-y-2">
+                <AnimationControls />
+                <Sonification />
+              </div>
+            </div>
+
+            {/* Row 2: Spectrum chart (full width) */}
+            <SpectrumChart />
+
+            {/* Row 3: Energy chart + Selection rules */}
+            <div className="grid grid-cols-2 gap-2">
+              <EnergyChart />
+              <SelectionRules />
+            </div>
+
+            {/* Row 4: Boltzmann + Symmetry */}
+            <div className="grid grid-cols-2 gap-2">
+              <BoltzmannPanel />
+              <SymmetryInfo />
+            </div>
+
+            {/* Row 5: Displacement table (full width) */}
+            <DisplacementTable />
           </div>
 
           {/* Keyboard hints */}

@@ -6,6 +6,9 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { Atoms } from "./Atoms";
 import { Bonds } from "./Bonds";
+import { DisplacementArrows } from "./DisplacementArrows";
+import { TrajectoryTrails } from "./TrajectoryTrails";
+import { SymmetryElements } from "./SymmetryElements";
 import { MOLECULE_SYMMETRY } from "@/lib/constants";
 import type { MoleculeData } from "@/lib/types";
 
@@ -75,6 +78,12 @@ export function MiniViewer({ molecule, modeIndex, label, accentColor }: Props) {
           <span className="text-sm font-mono text-foreground">
             ν = {mode.frequency.toFixed(0)} cm⁻¹
           </span>
+          <span className="text-[10px] font-mono text-foreground/30">
+            μ = {(molecule.atoms.reduce((sum, atom, i) => {
+              const d = mode.displacements[i];
+              return sum + atom.mass * (d[0] ** 2 + d[1] ** 2 + d[2] ** 2);
+            }, 0) / mode.displacements.reduce((sum, d) => sum + d[0] ** 2 + d[1] ** 2 + d[2] ** 2, 0) || 0).toFixed(2)} amu
+          </span>
         </div>
         <div className="flex items-center gap-2 text-[10px] font-mono">
           {symmetryLabel !== "—" && (
@@ -106,6 +115,9 @@ export function MiniViewer({ molecule, modeIndex, label, accentColor }: Props) {
           <CameraFit molecule={molecule} />
           <Atoms molecule={molecule} modeIndex={modeIndex} />
           <Bonds molecule={molecule} modeIndex={modeIndex} />
+          <DisplacementArrows molecule={molecule} modeIndex={modeIndex} color={accentColor} />
+          <TrajectoryTrails molecule={molecule} modeIndex={modeIndex} />
+          <SymmetryElements molecule={molecule} />
 
           <OrbitControls enableDamping dampingFactor={0.1} minDistance={2} maxDistance={20} />
         </Canvas>
