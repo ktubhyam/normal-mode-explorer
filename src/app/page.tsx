@@ -68,7 +68,7 @@ export default function Page() {
       {/* Mobile: vertical scroll | Desktop: side-by-side */}
       <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden">
         {/* 3D viewer — centered on mobile with top padding to push it down */}
-        <div className="pt-4 lg:pt-0 h-[50vh] lg:h-auto lg:flex-1 flex flex-col min-w-0 shrink-0">
+        <div className="pt-4 h-[50vh] lg:h-auto lg:flex-1 flex flex-col min-w-0 shrink-0">
           <div className="flex-1 min-h-0">
             <ComparisonView />
           </div>
