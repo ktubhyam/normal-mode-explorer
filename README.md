@@ -2,6 +2,8 @@
 
 Visualize and decompose molecular vibrations into individual normal modes. See how each mode contributes to the total vibrational motion.
 
+**[Project Page](https://tubhyam.dev/simulations/normal-mode-explorer)**
+
 ## Features
 
 - Decompose molecular vibrations into individual normal modes
