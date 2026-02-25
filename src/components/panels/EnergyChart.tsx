@@ -17,14 +17,15 @@ export function EnergyChart() {
   const svgHeight = molecule.modes.length * (barHeight + gap) + 8;
   const labelWidth = 55;
   const chartWidth = 220;
+  const svgWidth = labelWidth + chartWidth + 60;
 
   return (
     <TerminalPanel title="Energy Distribution">
-      <div className="p-2 overflow-x-auto">
+      <div className="p-2">
         <svg
-          width={labelWidth + chartWidth + 60}
-          height={svgHeight}
-          className="font-mono"
+          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+          className="w-full font-mono"
+          preserveAspectRatio="xMidYMid meet"
         >
           {molecule.modes.map((mode, i) => {
             const isA = i === modeA;

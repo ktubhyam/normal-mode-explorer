@@ -64,13 +64,13 @@ export function MoleculePicker() {
     <div ref={containerRef} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-1.5 text-sm font-mono text-foreground hover:border-border-bright transition-colors"
+        className="flex items-center gap-1.5 sm:gap-2 bg-surface border border-border rounded-lg px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-mono text-foreground hover:border-border-bright transition-colors"
       >
         <span className="capitalize">
           {current ? current.name : "Select..."}
         </span>
         {current && (
-          <span className="text-foreground/40 text-xs">{current.formula}</span>
+          <span className="hidden sm:inline text-foreground/40 text-xs">{current.formula}</span>
         )}
         <svg
           width="10"
@@ -84,7 +84,7 @@ export function MoleculePicker() {
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full right-0 mt-1 w-64 bg-surface border border-border rounded-lg shadow-xl overflow-hidden">
+        <div className="fixed sm:absolute z-50 top-12 sm:top-full right-2 sm:right-0 left-2 sm:left-auto mt-0 sm:mt-1 sm:w-64 bg-surface border border-border rounded-lg shadow-xl overflow-hidden">
           <div className="p-2 border-b border-border">
             <input
               ref={inputRef}

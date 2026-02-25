@@ -31,7 +31,6 @@ function DataLoader() {
   const setManifest = useExplorerStore((s) => s.setManifest);
   const setLoading = useExplorerStore((s) => s.setLoading);
 
-  // Load manifest on mount
   useEffect(() => {
     fetch("/molecules/index.json")
       .then((r) => r.json())
@@ -39,7 +38,6 @@ function DataLoader() {
       .catch(console.error);
   }, [setManifest]);
 
-  // Load molecule when ID changes
   useEffect(() => {
     setLoading(true);
     fetch(`/molecules/${moleculeId}.json`)
@@ -65,19 +63,20 @@ export default function Page() {
       <DataLoader />
       <Header />
 
-      <div className="flex-1 flex min-h-0">
-        {/* Left: 3D viewer(s) — ~55% */}
-        <div className="flex-1 flex flex-col min-h-0 min-w-0">
+      {/* Mobile: vertical scroll | Desktop: side-by-side */}
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden">
+        {/* 3D viewer — fixed height on mobile, flex on desktop */}
+        <div className="h-[50vh] lg:h-auto lg:flex-1 flex flex-col min-w-0 shrink-0">
           <div className="flex-1 min-h-0">
             <ComparisonView />
           </div>
         </div>
 
-        {/* Right: Analysis panels — scrollable dashboard */}
-        <aside className="w-[420px] border-l border-border bg-surface/30 overflow-y-auto shrink-0">
+        {/* Analysis panels — full width on mobile, fixed sidebar on desktop */}
+        <aside className="w-full lg:w-[420px] border-t lg:border-t-0 lg:border-l border-border bg-surface/30 lg:overflow-y-auto shrink-0">
           <div className="p-2 space-y-2">
-            {/* Row 1: Mode list + Animation controls side by side */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* Mode list + Animation controls */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <ModeList />
               <div className="space-y-2">
                 <AnimationControls />
@@ -85,27 +84,27 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Row 2: Spectrum chart (full width) */}
+            {/* Spectrum chart */}
             <SpectrumChart />
 
-            {/* Row 3: Energy chart + Selection rules */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* Energy chart + Selection rules */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <EnergyChart />
               <SelectionRules />
             </div>
 
-            {/* Row 4: Boltzmann + Symmetry */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* Boltzmann + Symmetry */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <BoltzmannPanel />
               <SymmetryInfo />
             </div>
 
-            {/* Row 5: Displacement table (full width) */}
+            {/* Displacement table */}
             <DisplacementTable />
           </div>
 
-          {/* Keyboard hints */}
-          <div className="px-3 py-2 border-t border-border">
+          {/* Keyboard hints — hidden on touch devices */}
+          <div className="hidden lg:block px-3 py-2 border-t border-border">
             <div className="text-[9px] font-mono text-foreground/20 space-y-0.5">
               <div>Space — play/pause</div>
               <div>↑↓ — cycle mode A</div>

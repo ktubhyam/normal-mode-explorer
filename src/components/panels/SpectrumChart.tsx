@@ -56,11 +56,11 @@ export function SpectrumChart() {
     (wn) => wn >= minWn && wn <= maxWn,
   );
 
-  // Find nearest mode for click
+  // Find nearest mode for click — scale click position to viewBox coordinates
   const handleClick = (e: React.MouseEvent<SVGSVGElement>) => {
     const svg = e.currentTarget;
     const rect = svg.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    const x = ((e.clientX - rect.left) / rect.width) * W;
     const clickWn = minWn + ((x - padL) / plotW) * (maxWn - minWn);
 
     let bestIdx = 0;
@@ -100,11 +100,11 @@ export function SpectrumChart() {
         </div>
       </div>
 
-      <div className="px-1 pb-2 overflow-x-auto">
+      <div className="px-1 pb-2">
         <svg
-          width={W}
-          height={H}
-          className="font-mono cursor-crosshair"
+          viewBox={`0 0 ${W} ${H}`}
+          className="w-full font-mono cursor-crosshair"
+          preserveAspectRatio="xMidYMid meet"
           onClick={handleClick}
         >
           {/* Grid */}
