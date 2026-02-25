@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useExplorerStore } from "@/lib/store";
 import { TerminalPanel } from "../ui/TerminalPanel";
 
@@ -9,9 +10,12 @@ export function EnergyChart() {
   const modeB = useExplorerStore((s) => s.modeB);
   const setModeA = useExplorerStore((s) => s.setModeA);
 
-  if (!molecule || molecule.modes.length === 0) return null;
+  const maxFreq = useMemo(
+    () => (molecule ? Math.max(...molecule.modes.map((m) => m.frequency)) : 0),
+    [molecule],
+  );
 
-  const maxFreq = Math.max(...molecule.modes.map((m) => m.frequency));
+  if (!molecule || molecule.modes.length === 0) return null;
   const barHeight = 16;
   const gap = 3;
   const svgHeight = molecule.modes.length * (barHeight + gap) + 8;

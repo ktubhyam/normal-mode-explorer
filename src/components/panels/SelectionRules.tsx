@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useExplorerStore } from "@/lib/store";
 import { TerminalPanel } from "../ui/TerminalPanel";
 
@@ -8,15 +9,20 @@ export function SelectionRules() {
   const modeA = useExplorerStore((s) => s.modeA);
   const modeB = useExplorerStore((s) => s.modeB);
 
+  const { maxIR, maxRaman } = useMemo(() => {
+    if (!molecule) return { maxIR: 1, maxRaman: 1 };
+    return {
+      maxIR: Math.max(...molecule.modes.map((m) => m.ir_intensity), 1),
+      maxRaman: Math.max(...molecule.modes.map((m) => m.raman_activity), 1),
+    };
+  }, [molecule]);
+
   if (!molecule) return null;
 
   const modes = [
     { label: "A", index: modeA, color: "#00D8FF" },
     ...(modeB !== null ? [{ label: "B", index: modeB, color: "#C9A04A" }] : []),
   ];
-
-  const maxIR = Math.max(...molecule.modes.map((m) => m.ir_intensity), 1);
-  const maxRaman = Math.max(...molecule.modes.map((m) => m.raman_activity), 1);
 
   return (
     <TerminalPanel title="Selection Rules">
@@ -44,7 +50,6 @@ export function SelectionRules() {
                 </span>
               </div>
 
-              {/* IR */}
               <div className="space-y-0.5">
                 <div className="flex items-center justify-between text-[10px] font-mono">
                   <span className={irActive ? "text-ir" : "text-foreground/30"}>
@@ -54,7 +59,7 @@ export function SelectionRules() {
                     {mode.ir_intensity.toFixed(2)}
                   </span>
                 </div>
-                <div className="h-1 bg-surface-2 rounded-full overflow-hidden">
+                <div className="h-1 bg-surface-2 rounded-full overflow-hidden" role="progressbar" aria-valuenow={irPct} aria-label={`IR intensity ${mode.ir_intensity.toFixed(2)}`}>
                   <div
                     className="h-full rounded-full transition-all duration-300"
                     style={{
@@ -65,7 +70,6 @@ export function SelectionRules() {
                 </div>
               </div>
 
-              {/* Raman */}
               <div className="space-y-0.5">
                 <div className="flex items-center justify-between text-[10px] font-mono">
                   <span className={ramanActive ? "text-raman" : "text-foreground/30"}>
@@ -75,7 +79,7 @@ export function SelectionRules() {
                     {mode.raman_activity.toFixed(2)}
                   </span>
                 </div>
-                <div className="h-1 bg-surface-2 rounded-full overflow-hidden">
+                <div className="h-1 bg-surface-2 rounded-full overflow-hidden" role="progressbar" aria-valuenow={ramanPct} aria-label={`Raman activity ${mode.raman_activity.toFixed(2)}`}>
                   <div
                     className="h-full rounded-full transition-all duration-300"
                     style={{
@@ -86,7 +90,6 @@ export function SelectionRules() {
                 </div>
               </div>
 
-              {/* Explanation */}
               <p className="text-[9px] font-mono text-foreground/25 leading-relaxed">
                 {irActive && "Requires change in dipole moment. "}
                 {ramanActive && "Requires change in polarizability. "}

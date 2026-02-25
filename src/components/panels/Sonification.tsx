@@ -100,12 +100,14 @@ export function Sonification() {
         <div className="flex gap-2">
           <button
             onClick={() => playTone(modeA)}
+            aria-label="Play current mode tone"
             className="flex-1 py-1.5 rounded bg-surface-2 border border-border hover:border-cyan/40 transition-colors text-[10px] font-mono text-foreground/60 hover:text-cyan"
           >
             ♪ Play Mode
           </button>
           <button
             onClick={playChord}
+            aria-label="Play all modes as chord"
             className="flex-1 py-1.5 rounded bg-surface-2 border border-border hover:border-accent/40 transition-colors text-[10px] font-mono text-foreground/60 hover:text-accent"
           >
             ♫ All Modes

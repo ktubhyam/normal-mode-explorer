@@ -14,7 +14,6 @@ interface Props {
 
 const UP = new THREE.Vector3(0, 1, 0);
 
-// Strain colors: compressed = warm, stretched = cool
 const STRAIN_COMPRESSED = new THREE.Color("#FF4444");
 const STRAIN_NEUTRAL = new THREE.Color("#555555");
 const STRAIN_STRETCHED = new THREE.Color("#4488FF");
@@ -30,7 +29,6 @@ export function Bonds({ molecule, modeIndex }: Props) {
   const tmpDir = useMemo(() => new THREE.Vector3(), []);
   const tmpQuat = useMemo(() => new THREE.Quaternion(), []);
 
-  // Precompute rest lengths for strain coloring
   const restLengths = useMemo(() => {
     return molecule.bonds.map((bond) => {
       const a = molecule.atoms[bond.atom1];
@@ -42,12 +40,16 @@ export function Bonds({ molecule, modeIndex }: Props) {
   useFrame(({ clock }) => {
     if (!molecule.modes.length || !molecule.bonds.length) return;
 
-    const { isPlaying, speed, amplitude } = useExplorerStore.getState();
+    const { isPlaying, speed, amplitude, superpositionEnabled, superpositionModes } =
+      useExplorerStore.getState();
     const mode = molecule.modes[modeIndex];
     if (!mode) return;
 
     const t = clock.getElapsedTime();
-    const phase = isPlaying ? Math.sin(2 * Math.PI * VISUAL_FREQ * speed * t) : 0;
+
+    const activeModes = superpositionEnabled && superpositionModes.size > 0
+      ? Array.from(superpositionModes)
+      : [modeIndex];
 
     molecule.bonds.forEach((bond, bi) => {
       const mesh = meshRefs.current[bi];
@@ -55,19 +57,28 @@ export function Bonds({ molecule, modeIndex }: Props) {
 
       const atomA = molecule.atoms[bond.atom1];
       const atomB = molecule.atoms[bond.atom2];
-      const dispA = mode.displacements[bond.atom1];
-      const dispB = mode.displacements[bond.atom2];
 
-      tmpA.set(
-        atomA.x + amplitude * dispA[0] * phase,
-        atomA.y + amplitude * dispA[1] * phase,
-        atomA.z + amplitude * dispA[2] * phase,
-      );
-      tmpB.set(
-        atomB.x + amplitude * dispB[0] * phase,
-        atomB.y + amplitude * dispB[1] * phase,
-        atomB.z + amplitude * dispB[2] * phase,
-      );
+      // Sum displacements from all active modes
+      let dxA = 0, dyA = 0, dzA = 0;
+      let dxB = 0, dyB = 0, dzB = 0;
+      for (const mi of activeModes) {
+        const m = molecule.modes[mi];
+        if (!m) continue;
+        const dA = m.displacements[bond.atom1];
+        const dB = m.displacements[bond.atom2];
+        const modePhase = isPlaying
+          ? Math.sin(2 * Math.PI * VISUAL_FREQ * speed * t + mi * 0.7)
+          : 0;
+        dxA += amplitude * dA[0] * modePhase;
+        dyA += amplitude * dA[1] * modePhase;
+        dzA += amplitude * dA[2] * modePhase;
+        dxB += amplitude * dB[0] * modePhase;
+        dyB += amplitude * dB[1] * modePhase;
+        dzB += amplitude * dB[2] * modePhase;
+      }
+
+      tmpA.set(atomA.x + dxA, atomA.y + dyA, atomA.z + dzA);
+      tmpB.set(atomB.x + dxB, atomB.y + dyB, atomB.z + dzB);
 
       mesh.position.lerpVectors(tmpA, tmpB, 0.5);
 
@@ -78,11 +89,10 @@ export function Bonds({ molecule, modeIndex }: Props) {
       mesh.quaternion.copy(tmpQuat);
       mesh.scale.set(1, length, 1);
 
-      // Strain coloring: compare current length to rest length
       const mat = matRefs.current[bi];
       if (mat && restLengths[bi]) {
-        const strain = (length - restLengths[bi]) / restLengths[bi]; // negative = compressed, positive = stretched
-        const clampedStrain = Math.max(-1, Math.min(1, strain * 8)); // amplify for visibility
+        const strain = (length - restLengths[bi]) / restLengths[bi];
+        const clampedStrain = Math.max(-1, Math.min(1, strain * 8));
 
         if (clampedStrain < 0) {
           tmpStrainColor.copy(STRAIN_NEUTRAL).lerp(STRAIN_COMPRESSED, -clampedStrain);

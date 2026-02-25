@@ -8,7 +8,6 @@ import { useExplorerStore } from "@/lib/store";
 import { CPK_COLORS, COVALENT_RADII, ATOM_SCALE, VISUAL_FREQ } from "@/lib/constants";
 import type { MoleculeData } from "@/lib/types";
 
-// Color ramp for displacement magnitude: grey → cyan → white
 const DISP_COLOR_LOW = new THREE.Color("#555555");
 const DISP_COLOR_MID = new THREE.Color("#00D8FF");
 const DISP_COLOR_HIGH = new THREE.Color("#FFFFFF");
@@ -41,7 +40,6 @@ export function Atoms({ molecule, modeIndex }: Props) {
     [molecule.atoms],
   );
 
-  // Precompute displacement magnitudes for this mode
   const dispMagnitudes = useMemo(() => {
     const mode = molecule.modes[modeIndex];
     if (!mode) return [];
@@ -55,7 +53,8 @@ export function Atoms({ molecule, modeIndex }: Props) {
   useFrame(({ clock }) => {
     if (!molecule.modes.length) return;
 
-    const { isPlaying, speed, amplitude, showLabels } = useExplorerStore.getState();
+    const { isPlaying, speed, amplitude, superpositionEnabled, superpositionModes } =
+      useExplorerStore.getState();
     const mode = molecule.modes[modeIndex];
     if (!mode) return;
 
@@ -63,20 +62,34 @@ export function Atoms({ molecule, modeIndex }: Props) {
     const phase = isPlaying ? Math.sin(2 * Math.PI * VISUAL_FREQ * speed * t) : 0;
     const absPhase = Math.abs(phase);
 
+    // Determine which modes to sum
+    const activeModes = superpositionEnabled && superpositionModes.size > 0
+      ? Array.from(superpositionModes)
+      : [modeIndex];
+
     for (let i = 0; i < molecule.atoms.length; i++) {
       const mesh = meshRefs.current[i];
       if (!mesh) continue;
 
       const atom = molecule.atoms[i];
-      const disp = mode.displacements[i];
 
-      mesh.position.set(
-        atom.x + amplitude * disp[0] * phase,
-        atom.y + amplitude * disp[1] * phase,
-        atom.z + amplitude * disp[2] * phase,
-      );
+      // Sum displacements from all active modes
+      let dx = 0, dy = 0, dz = 0;
+      for (const mi of activeModes) {
+        const m = molecule.modes[mi];
+        if (!m) continue;
+        const d = m.displacements[i];
+        // Each mode gets a slightly different phase for realism
+        const modePhase = isPlaying
+          ? Math.sin(2 * Math.PI * VISUAL_FREQ * speed * t + mi * 0.7)
+          : 0;
+        dx += amplitude * d[0] * modePhase;
+        dy += amplitude * d[1] * modePhase;
+        dz += amplitude * d[2] * modePhase;
+      }
 
-      // Dynamic displacement coloring: pulse with animation
+      mesh.position.set(atom.x + dx, atom.y + dy, atom.z + dz);
+
       const mat = matRefs.current[i];
       if (mat && dispMagnitudes[i] !== undefined) {
         const intensity = dispMagnitudes[i] * absPhase;
@@ -111,7 +124,6 @@ export function Atoms({ molecule, modeIndex }: Props) {
               emissive="#000000"
               emissiveIntensity={0}
             />
-            {/* Always-visible element label */}
             {showLabels && (
               <Html
                 center

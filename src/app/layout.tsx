@@ -9,6 +9,23 @@ export const metadata: Metadata = {
   title: "Normal Mode Explorer — Decompose Molecular Vibrations",
   description:
     "Decompose and compare individual molecular vibrational normal modes. Visualize symmetry labels, selection rules, and energy distribution interactively.",
+  icons: {
+    icon: "/favicon.svg",
+  },
+  openGraph: {
+    title: "Normal Mode Explorer",
+    description:
+      "Interactive 3D molecular vibration explorer. Decompose normal modes, compare IR/Raman activity, visualize symmetry elements, and hear frequency sonification.",
+    type: "website",
+    url: "https://normal-mode-explorer.vercel.app",
+    siteName: "Normal Mode Explorer",
+  },
+  twitter: {
+    card: "summary",
+    title: "Normal Mode Explorer",
+    description:
+      "Interactive 3D molecular vibration explorer with displacement arrows, Boltzmann populations, and mode superposition.",
+  },
 };
 
 export default function RootLayout({

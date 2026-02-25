@@ -9,8 +9,10 @@ export function useKeyboard() {
       // Don't capture when typing in inputs
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
-      const { molecule, modeA, modeB, togglePlaying, setModeA, setModeB } =
-        useExplorerStore.getState();
+      const {
+        molecule, modeA, modeB, togglePlaying, setModeA, setModeB,
+        superpositionEnabled, setSuperpositionEnabled, clearSuperposition,
+      } = useExplorerStore.getState();
       if (!molecule) return;
 
       const maxMode = molecule.modes.length - 1;
@@ -51,8 +53,22 @@ export function useKeyboard() {
             setModeB(null);
           }
           break;
+        case "s":
+        case "S":
+          e.preventDefault();
+          if (superpositionEnabled) {
+            clearSuperposition();
+            setSuperpositionEnabled(false);
+          } else {
+            setSuperpositionEnabled(true);
+          }
+          break;
         case "Escape":
-          if (modeB !== null) {
+          if (superpositionEnabled) {
+            e.preventDefault();
+            clearSuperposition();
+            setSuperpositionEnabled(false);
+          } else if (modeB !== null) {
             e.preventDefault();
             setModeB(null);
           }

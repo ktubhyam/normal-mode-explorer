@@ -157,4 +157,27 @@ input[type="range"]::-moz-range-thumb {
   background: var(--accent);
   cursor: pointer;
   border: none;
+  box-shadow: 0 0 4px rgba(201, 160, 74, 0.3);
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  box-shadow: 0 0 10px rgba(201, 160, 74, 0.6);
+}
+
+input[type="range"]::-moz-range-track {
+  background: var(--border-bright);
+  height: 4px;
+  border-radius: 2px;
+  border: none;
+}
+
+/* Focus styles for accessibility */
+button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+input[type="range"]:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
 }

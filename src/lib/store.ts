@@ -10,9 +10,11 @@ interface ExplorerStore {
   moleculeId: string;
   molecule: MoleculeData | null;
   loading: boolean;
+  error: string | null;
   setMoleculeId: (id: string) => void;
   setMolecule: (data: MoleculeData | null) => void;
   setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
 
   // Dual mode selection
   modeA: number;
@@ -31,11 +33,9 @@ interface ExplorerStore {
   isPlaying: boolean;
   speed: number;
   amplitude: number;
-  phase: number;
   togglePlaying: () => void;
   setSpeed: (speed: number) => void;
   setAmplitude: (amplitude: number) => void;
-  setPhase: (phase: number) => void;
 
   // Visual toggles
   showArrows: boolean;
@@ -49,10 +49,6 @@ interface ExplorerStore {
   toggleLabels: () => void;
   toggleGrid: () => void;
 
-  // Fullscreen
-  isFullscreen: boolean;
-  setFullscreen: (fs: boolean) => void;
-
   // Temperature (Kelvin) for Boltzmann distribution
   temperature: number;
   setTemperature: (temp: number) => void;
@@ -60,10 +56,6 @@ interface ExplorerStore {
   // Spectrum display
   spectrumType: "ir" | "raman";
   setSpectrumType: (type: "ir" | "raman") => void;
-
-  // Sonification
-  isSoundOn: boolean;
-  toggleSound: () => void;
 }
 
 export const useExplorerStore = create<ExplorerStore>((set) => ({
@@ -73,16 +65,19 @@ export const useExplorerStore = create<ExplorerStore>((set) => ({
   moleculeId: "water",
   molecule: null,
   loading: false,
+  error: null,
   setMoleculeId: (id) =>
     set({
       moleculeId: id,
       modeA: 0,
       modeB: null,
+      error: null,
       superpositionModes: new Set(),
       superpositionEnabled: false,
     }),
   setMolecule: (data) => set({ molecule: data }),
   setLoading: (loading) => set({ loading }),
+  setError: (error) => set({ error }),
 
   modeA: 0,
   modeB: null,
@@ -104,11 +99,9 @@ export const useExplorerStore = create<ExplorerStore>((set) => ({
   isPlaying: true,
   speed: 1.0,
   amplitude: 0.5,
-  phase: 0,
   togglePlaying: () => set((s) => ({ isPlaying: !s.isPlaying })),
   setSpeed: (speed) => set({ speed }),
   setAmplitude: (amplitude) => set({ amplitude }),
-  setPhase: (phase) => set({ phase }),
 
   showArrows: true,
   showTrails: false,
@@ -122,15 +115,9 @@ export const useExplorerStore = create<ExplorerStore>((set) => ({
   toggleLabels: () => set((s) => ({ showLabels: !s.showLabels })),
   toggleGrid: () => set((s) => ({ showGrid: !s.showGrid })),
 
-  isFullscreen: false,
-  setFullscreen: (fs) => set({ isFullscreen: fs }),
-
   temperature: 300,
   setTemperature: (temp) => set({ temperature: temp }),
 
   spectrumType: "ir",
   setSpectrumType: (type) => set({ spectrumType: type }),
-
-  isSoundOn: false,
-  toggleSound: () => set((s) => ({ isSoundOn: !s.isSoundOn })),
 }));
