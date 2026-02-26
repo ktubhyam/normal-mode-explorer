@@ -98,7 +98,7 @@ export default function Page() {
       <Header />
       <MobileModeStrip />
 
-      <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden">
+      <main id="main-content" className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden">
         {/* 3D viewer */}
         <div className="pt-4 h-[50vh] lg:h-auto lg:flex-1 flex flex-col min-w-0 shrink-0">
           <div className="flex-1 min-h-0">
@@ -143,7 +143,7 @@ export default function Page() {
             </div>
           </div>
         </aside>
-      </div>
+      </main>
     </div>
   );
 }

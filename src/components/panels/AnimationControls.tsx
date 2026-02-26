@@ -31,7 +31,6 @@ export function AnimationControls() {
         {/* Play/Pause */}
         <button
           onClick={togglePlaying}
-          aria-label={isPlaying ? "Pause animation" : "Play animation"}
           className="w-full flex items-center justify-center gap-2 py-1.5 rounded bg-surface-2 border border-border hover:border-border-bright transition-colors text-xs font-mono text-foreground/70 hover:text-foreground"
         >
           {isPlaying ? (
@@ -98,7 +97,6 @@ export function AnimationControls() {
                 setSuperpositionEnabled(true);
               }
             }}
-            aria-label={superpositionEnabled ? "Disable superposition mode" : "Enable superposition mode"}
             aria-pressed={superpositionEnabled}
             className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-[10px] font-mono transition-colors ${
               superpositionEnabled
@@ -133,7 +131,6 @@ function ToggleButton({ active, onClick, label }: {
   return (
     <button
       onClick={onClick}
-      aria-label={`Toggle ${label} ${active ? "off" : "on"}`}
       aria-pressed={active}
       className={`w-full flex items-center justify-between px-2 py-1 rounded text-[10px] font-mono transition-colors ${
         active

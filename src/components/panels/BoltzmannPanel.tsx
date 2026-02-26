@@ -57,6 +57,7 @@ export function BoltzmannPanel() {
             step={10}
             value={temperature}
             onChange={(e) => setTemperature(parseInt(e.target.value))}
+            aria-label="Temperature"
           />
           <div className="flex justify-between text-[8px] font-mono text-foreground/20">
             <span>10 K</span>

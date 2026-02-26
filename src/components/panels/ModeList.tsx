@@ -74,7 +74,6 @@ export function ModeList() {
               key={i}
               ref={isA ? activeRef : null}
               onClick={(e) => handleClick(i, e)}
-              aria-label={`Mode ${i + 1}: ${mode.frequency.toFixed(0)} wavenumbers`}
               aria-pressed={isA || isB || isSuper}
               className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left transition-colors text-xs font-mono ${
                 isSuper

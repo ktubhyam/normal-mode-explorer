@@ -31,6 +31,7 @@ export function MobileModeStrip() {
       <button
         onClick={() => setModeA(Math.max(0, modeA - 1))}
         disabled={modeA === 0}
+        aria-label="Previous mode"
         className="w-9 h-9 flex items-center justify-center rounded bg-surface-2 border border-border text-foreground/50 disabled:opacity-20"
       >
         <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
@@ -50,7 +51,7 @@ export function MobileModeStrip() {
           <span className="text-[10px] font-mono text-foreground/50">{symmetryLabel}</span>
         )}
         {modeDesc && (
-          <span className="text-[9px] font-mono text-foreground/30 truncate max-w-[100px]">{modeDesc}</span>
+          <span className="text-[10px] font-mono text-foreground/50 truncate max-w-[100px]">{modeDesc}</span>
         )}
         <div className="flex gap-0.5">
           {irActive && (
@@ -65,6 +66,7 @@ export function MobileModeStrip() {
       {/* Play/Pause */}
       <button
         onClick={togglePlaying}
+        aria-label={isPlaying ? "Pause animation" : "Play animation"}
         className="w-9 h-9 flex items-center justify-center rounded bg-surface-2 border border-border text-foreground/50"
       >
         {isPlaying ? (
@@ -83,6 +85,7 @@ export function MobileModeStrip() {
       <button
         onClick={() => setModeA(Math.min(maxMode, modeA + 1))}
         disabled={modeA === maxMode}
+        aria-label="Next mode"
         className="w-9 h-9 flex items-center justify-center rounded bg-surface-2 border border-border text-foreground/50 disabled:opacity-20"
       >
         <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
