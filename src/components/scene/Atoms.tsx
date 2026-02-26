@@ -3,17 +3,18 @@
 import { useRef, useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
-import * as THREE from "three";
+import { Color, Mesh, MeshStandardMaterial } from "three";
+import type { Mesh as MeshType, MeshStandardMaterial as MatType } from "three";
 import { useExplorerStore } from "@/lib/store";
 import { CPK_COLORS, COVALENT_RADII, ATOM_SCALE, VISUAL_FREQ } from "@/lib/constants";
 import type { MoleculeData } from "@/lib/types";
 
-const DISP_COLOR_LOW = new THREE.Color("#555555");
-const DISP_COLOR_MID = new THREE.Color("#00D8FF");
-const DISP_COLOR_HIGH = new THREE.Color("#FFFFFF");
-const tmpColor = new THREE.Color();
+const DISP_COLOR_LOW = new Color("#555555");
+const DISP_COLOR_MID = new Color("#00D8FF");
+const DISP_COLOR_HIGH = new Color("#FFFFFF");
+const tmpColor = new Color();
 
-function getDispColor(t: number): THREE.Color {
+function getDispColor(t: number): Color {
   if (t < 0.5) {
     return tmpColor.copy(DISP_COLOR_LOW).lerp(DISP_COLOR_MID, t * 2);
   }
@@ -26,8 +27,8 @@ interface Props {
 }
 
 export function Atoms({ molecule, modeIndex }: Props) {
-  const meshRefs = useRef<(THREE.Mesh | null)[]>([]);
-  const matRefs = useRef<(THREE.MeshStandardMaterial | null)[]>([]);
+  const meshRefs = useRef<(MeshType | null)[]>([]);
+  const matRefs = useRef<(MatType | null)[]>([]);
   const [hoveredAtom, setHoveredAtom] = useState<number | null>(null);
   const showLabels = useExplorerStore((s) => s.showLabels);
 
@@ -115,7 +116,7 @@ export function Atoms({ molecule, modeIndex }: Props) {
             onPointerOver={pointerHandlers[i].onPointerOver}
             onPointerOut={pointerHandlers[i].onPointerOut}
           >
-            <sphereGeometry args={[radius, 24, 24]} />
+            <sphereGeometry args={[radius, 16, 16]} />
             <meshStandardMaterial
               ref={(el) => { matRefs.current[i] = el; }}
               color={color}

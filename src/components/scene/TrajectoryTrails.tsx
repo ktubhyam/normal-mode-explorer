@@ -2,7 +2,8 @@
 
 import { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
+import { Color, BufferGeometry, BufferAttribute, LineBasicMaterial, Line, Material } from "three";
+import type { Group as GroupType, Line as LineType, BufferAttribute as BufAttrType } from "three";
 import { useExplorerStore } from "@/lib/store";
 import { CPK_COLORS } from "@/lib/constants";
 import type { MoleculeData } from "@/lib/types";
@@ -15,8 +16,8 @@ interface Props {
 }
 
 export function TrajectoryTrails({ molecule, modeIndex }: Props) {
-  const groupRef = useRef<THREE.Group>(null);
-  const linesRef = useRef<THREE.Line[]>([]);
+  const groupRef = useRef<GroupType>(null);
+  const linesRef = useRef<LineType[]>([]);
 
   // Precompute trail data
   const trailData = useMemo(() => {
@@ -26,7 +27,7 @@ export function TrajectoryTrails({ molecule, modeIndex }: Props) {
     return molecule.atoms.map((atom, i) => {
       const disp = mode.displacements[i];
       const magnitude = Math.sqrt(disp[0] ** 2 + disp[1] ** 2 + disp[2] ** 2);
-      const color = new THREE.Color(CPK_COLORS[atom.element] ?? "#FF69B4");
+      const color = new Color(CPK_COLORS[atom.element] ?? "#FF69B4");
 
       // Precompute positions for one full cycle
       const positions = new Float32Array(TRAIL_POINTS * 3);
@@ -58,25 +59,25 @@ export function TrajectoryTrails({ molecule, modeIndex }: Props) {
     while (group.children.length > 0) {
       const child = group.children[0];
       group.remove(child);
-      if (child instanceof THREE.Line) {
+      if (child instanceof Line) {
         child.geometry.dispose();
-        (child.material as THREE.Material).dispose();
+        (child.material as Material).dispose();
       }
     }
     linesRef.current = [];
 
     trailData.forEach((trail) => {
-      const geom = new THREE.BufferGeometry();
-      geom.setAttribute("position", new THREE.BufferAttribute(trail.positions.slice(), 3));
-      geom.setAttribute("color", new THREE.BufferAttribute(trail.colors, 3));
+      const geom = new BufferGeometry();
+      geom.setAttribute("position", new BufferAttribute(trail.positions.slice(), 3));
+      geom.setAttribute("color", new BufferAttribute(trail.colors, 3));
 
-      const mat = new THREE.LineBasicMaterial({
+      const mat = new LineBasicMaterial({
         vertexColors: true,
         transparent: true,
         opacity: 0.5,
       });
 
-      const line = new THREE.Line(geom, mat);
+      const line = new Line(geom, mat);
       group.add(line);
       linesRef.current.push(line);
     });
@@ -84,7 +85,7 @@ export function TrajectoryTrails({ molecule, modeIndex }: Props) {
     return () => {
       linesRef.current.forEach((line) => {
         line.geometry.dispose();
-        (line.material as THREE.Material).dispose();
+        (line.material as Material).dispose();
       });
       linesRef.current = [];
     };
@@ -100,7 +101,7 @@ export function TrajectoryTrails({ molecule, modeIndex }: Props) {
       line.visible = showTrails;
       if (!showTrails) return;
 
-      const posAttr = line.geometry.getAttribute("position") as THREE.BufferAttribute;
+      const posAttr = line.geometry.getAttribute("position") as BufAttrType;
       const { atom, disp } = trail;
 
       for (let t = 0; t < TRAIL_POINTS; t++) {

@@ -2,7 +2,8 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
+import { Vector3, DoubleSide } from "three";
+import type { Group as GroupType } from "three";
 import { useExplorerStore } from "@/lib/store";
 import { MOLECULE_SYMMETRY } from "@/lib/constants";
 import type { MoleculeData } from "@/lib/types";
@@ -12,19 +13,19 @@ interface Props {
 }
 
 export function SymmetryElements({ molecule }: Props) {
-  const groupRef = useRef<THREE.Group>(null);
+  const groupRef = useRef<GroupType>(null);
 
   const symmetryData = MOLECULE_SYMMETRY[molecule.name.toLowerCase().replace(/\s+/g, "_")];
   const pointGroup = symmetryData?.pointGroup || "";
 
   const { center, extent } = useMemo(() => {
-    const c = new THREE.Vector3();
-    molecule.atoms.forEach((a) => c.add(new THREE.Vector3(a.x, a.y, a.z)));
+    const c = new Vector3();
+    molecule.atoms.forEach((a) => c.add(new Vector3(a.x, a.y, a.z)));
     c.divideScalar(molecule.atoms.length);
 
     let maxDist = 0;
     molecule.atoms.forEach((a) => {
-      const d = new THREE.Vector3(a.x, a.y, a.z).distanceTo(c);
+      const d = new Vector3(a.x, a.y, a.z).distanceTo(c);
       if (d > maxDist) maxDist = d;
     });
 
@@ -60,21 +61,21 @@ export function SymmetryElements({ molecule }: Props) {
       {hasSigmaV && (
         <mesh position={[center.x, center.y, center.z]}>
           <planeGeometry args={[extent * 2, extent * 2]} />
-          <meshBasicMaterial color="#C9A04A" transparent opacity={0.08} side={THREE.DoubleSide} depthWrite={false} />
+          <meshBasicMaterial color="#C9A04A" transparent opacity={0.08} side={DoubleSide} depthWrite={false} />
         </mesh>
       )}
 
       {hasSigmaV && (
         <mesh position={[center.x, center.y, center.z]} rotation={[0, Math.PI / 2, 0]}>
           <planeGeometry args={[extent * 2, extent * 2]} />
-          <meshBasicMaterial color="#C9A04A" transparent opacity={0.08} side={THREE.DoubleSide} depthWrite={false} />
+          <meshBasicMaterial color="#C9A04A" transparent opacity={0.08} side={DoubleSide} depthWrite={false} />
         </mesh>
       )}
 
       {hasSigmaH && (
         <mesh position={[center.x, center.y, center.z]} rotation={[Math.PI / 2, 0, 0]}>
           <planeGeometry args={[extent * 2, extent * 2]} />
-          <meshBasicMaterial color="#A78BFA" transparent opacity={0.08} side={THREE.DoubleSide} depthWrite={false} />
+          <meshBasicMaterial color="#A78BFA" transparent opacity={0.08} side={DoubleSide} depthWrite={false} />
         </mesh>
       )}
     </group>

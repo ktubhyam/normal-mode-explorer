@@ -2,7 +2,8 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
+import { Vector3, Color, ArrowHelper } from "three";
+import type { Group as GroupType, ArrowHelper as ArrowHelperType } from "three";
 import { useExplorerStore } from "@/lib/store";
 import { VISUAL_FREQ } from "@/lib/constants";
 import type { MoleculeData } from "@/lib/types";
@@ -14,7 +15,7 @@ interface Props {
 }
 
 export function DisplacementArrows({ molecule, modeIndex, color = "#00D8FF" }: Props) {
-  const groupRef = useRef<THREE.Group>(null);
+  const groupRef = useRef<GroupType>(null);
 
   // Create arrow helpers — one per atom
   const arrows = useMemo(() => {
@@ -29,8 +30,8 @@ export function DisplacementArrows({ molecule, modeIndex, color = "#00D8FF" }: P
   }, [molecule, modeIndex]);
 
   // Reusable vectors
-  const tmpOrigin = useMemo(() => new THREE.Vector3(), []);
-  const tmpDir = useMemo(() => new THREE.Vector3(), []);
+  const tmpOrigin = useMemo(() => new Vector3(), []);
+  const tmpDir = useMemo(() => new Vector3(), []);
 
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
@@ -47,7 +48,7 @@ export function DisplacementArrows({ molecule, modeIndex, color = "#00D8FF" }: P
 
     const children = groupRef.current.children;
     arrows.forEach((arrow, ci) => {
-      const arrowHelper = children[ci] as THREE.ArrowHelper;
+      const arrowHelper = children[ci] as ArrowHelperType;
       if (!arrowHelper) return;
 
       const { atom, disp } = arrow;
@@ -74,10 +75,10 @@ export function DisplacementArrows({ molecule, modeIndex, color = "#00D8FF" }: P
         <arrowHelper
           key={`${modeIndex}-${i}`}
           args={[
-            new THREE.Vector3(arrow.disp[0], arrow.disp[1], arrow.disp[2]).normalize(),
-            new THREE.Vector3(arrow.atom.x, arrow.atom.y, arrow.atom.z),
+            new Vector3(arrow.disp[0], arrow.disp[1], arrow.disp[2]).normalize(),
+            new Vector3(arrow.atom.x, arrow.atom.y, arrow.atom.z),
             arrow.magnitude * 0.5,
-            new THREE.Color(color).getHex(),
+            new Color(color).getHex(),
             0.08,
             0.04,
           ]}

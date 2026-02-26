@@ -1,16 +1,27 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, ContactShadows } from "@react-three/drei";
-import * as THREE from "three";
+import { OrbitControls } from "@react-three/drei";
+import { Vector3, Box3, Sphere } from "three";
 import { Atoms } from "./Atoms";
 import { Bonds } from "./Bonds";
 import { DisplacementArrows } from "./DisplacementArrows";
 import { TrajectoryTrails } from "./TrajectoryTrails";
 import { SymmetryElements } from "./SymmetryElements";
-import { SceneEffects } from "./SceneEffects";
 import { GridFloor } from "./GridFloor";
+
+import { SceneEffects } from "./SceneEffects";
+
+/** Delays mounting children until after initial render to reduce TBT */
+function DeferredMount({ delay = 1500, children }: { delay?: number; children: React.ReactNode }) {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(() => setReady(true), delay);
+    return () => clearTimeout(id);
+  }, [delay]);
+  return ready ? <>{children}</> : null;
+}
 import { MOLECULE_SYMMETRY } from "@/lib/constants";
 import { useExplorerStore } from "@/lib/store";
 import type { MoleculeData } from "@/lib/types";
@@ -23,9 +34,9 @@ function CameraFit({ molecule }: { molecule: MoleculeData }) {
     if (molecule.name === prevMolRef.current) return;
     prevMolRef.current = molecule.name;
 
-    const points = molecule.atoms.map((a) => new THREE.Vector3(a.x, a.y, a.z));
-    const box = new THREE.Box3().setFromPoints(points);
-    const sphere = new THREE.Sphere();
+    const points = molecule.atoms.map((a) => new Vector3(a.x, a.y, a.z));
+    const box = new Box3().setFromPoints(points);
+    const sphere = new Sphere();
     box.getBoundingSphere(sphere);
 
     const radius = Math.max(sphere.radius, 0.8);
@@ -77,10 +88,6 @@ export function MiniViewer({ molecule, modeIndex, label, accentColor }: Props) {
   for (const a of molecule.atoms) { cx += a.x; cy += a.y; cz += a.z; }
   const n = molecule.atoms.length;
   const target: [number, number, number] = [cx / n, cy / n, cz / n];
-
-  // Lowest atom y for contact shadow placement
-  let minY = Infinity;
-  for (const a of molecule.atoms) { if (a.y < minY) minY = a.y; }
 
   // Screenshot handler
   const handleScreenshot = useCallback(() => {
@@ -162,17 +169,10 @@ export function MiniViewer({ molecule, modeIndex, label, accentColor }: Props) {
           <SymmetryElements molecule={molecule} />
           <GridFloor molecule={molecule} />
 
-          {/* Contact shadow under molecule */}
-          <ContactShadows
-            position={[0, minY - 1.2, 0]}
-            opacity={0.3}
-            scale={8}
-            blur={2}
-            far={4}
-            color="#000000"
-          />
-
-          <SceneEffects />
+          {/* Post-processing deferred to reduce initial TBT */}
+          <DeferredMount>
+            <SceneEffects />
+          </DeferredMount>
 
           <OrbitControls
             enableDamping

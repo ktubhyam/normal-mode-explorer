@@ -7,14 +7,8 @@ import { useKeyboard } from "@/hooks/useKeyboard";
 import { Header } from "@/components/Header";
 import { MobileModeStrip } from "@/components/MobileModeStrip";
 import { ModeList } from "@/components/panels/ModeList";
-import { SelectionRules } from "@/components/panels/SelectionRules";
 import { AnimationControls } from "@/components/panels/AnimationControls";
-import { SymmetryInfo } from "@/components/panels/SymmetryInfo";
-import { SpectrumChart } from "@/components/panels/SpectrumChart";
-import { BoltzmannPanel } from "@/components/panels/BoltzmannPanel";
-import { DisplacementTable } from "@/components/panels/DisplacementTable";
 import { Sonification } from "@/components/panels/Sonification";
-import { EnergyChart } from "@/components/panels/EnergyChart";
 import type { MoleculeData, MoleculeManifestEntry } from "@/lib/types";
 
 const ComparisonView = dynamic(
@@ -22,7 +16,49 @@ const ComparisonView = dynamic(
     import("@/components/scene/ComparisonView").then((m) => ({
       default: m.ComparisonView,
     })),
-  { ssr: false },
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex-1 flex items-center justify-center bg-[#030308]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative w-24 h-24">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-cyan/20 animate-pulse" />
+            </div>
+            <div className="absolute top-2 right-4">
+              <div className="w-4 h-4 rounded-full bg-foreground/10 animate-pulse" style={{ animationDelay: "0.2s" }} />
+            </div>
+            <div className="absolute bottom-2 left-4">
+              <div className="w-4 h-4 rounded-full bg-foreground/10 animate-pulse" style={{ animationDelay: "0.4s" }} />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+            <span className="text-foreground/40 font-mono text-xs">Loading 3D viewer...</span>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+);
+
+const SpectrumChart = dynamic(
+  () => import("@/components/panels/SpectrumChart").then((m) => ({ default: m.SpectrumChart })),
+);
+const EnergyChart = dynamic(
+  () => import("@/components/panels/EnergyChart").then((m) => ({ default: m.EnergyChart })),
+);
+const SelectionRules = dynamic(
+  () => import("@/components/panels/SelectionRules").then((m) => ({ default: m.SelectionRules })),
+);
+const BoltzmannPanel = dynamic(
+  () => import("@/components/panels/BoltzmannPanel").then((m) => ({ default: m.BoltzmannPanel })),
+);
+const SymmetryInfo = dynamic(
+  () => import("@/components/panels/SymmetryInfo").then((m) => ({ default: m.SymmetryInfo })),
+);
+const DisplacementTable = dynamic(
+  () => import("@/components/panels/DisplacementTable").then((m) => ({ default: m.DisplacementTable })),
 );
 
 function URLSync() {
@@ -99,8 +135,8 @@ export default function Page() {
       <MobileModeStrip />
 
       <main id="main-content" className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden">
-        {/* 3D viewer */}
-        <div className="pt-4 h-[50vh] lg:h-auto lg:flex-1 flex flex-col min-w-0 shrink-0">
+        {/* 3D viewer — fixed height on mobile to prevent CLS */}
+        <div className="h-[50vh] lg:h-auto lg:flex-1 flex flex-col min-w-0 shrink-0 overflow-hidden">
           <div className="flex-1 min-h-0">
             <ComparisonView />
           </div>

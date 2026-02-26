@@ -2,7 +2,8 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
+import { Vector3, Quaternion, Color, Group, Mesh, MeshStandardMaterial } from "three";
+import type { Group as GroupType, Mesh as MeshType, MeshStandardMaterial as MatType } from "three";
 import { useExplorerStore } from "@/lib/store";
 import { BOND_RADIUS, VISUAL_FREQ } from "@/lib/constants";
 import type { MoleculeData } from "@/lib/types";
@@ -12,22 +13,22 @@ interface Props {
   modeIndex: number;
 }
 
-const UP = new THREE.Vector3(0, 1, 0);
+const UP = new Vector3(0, 1, 0);
 
-const STRAIN_COMPRESSED = new THREE.Color("#FF4444");
-const STRAIN_NEUTRAL = new THREE.Color("#555555");
-const STRAIN_STRETCHED = new THREE.Color("#4488FF");
-const tmpStrainColor = new THREE.Color();
+const STRAIN_COMPRESSED = new Color("#FF4444");
+const STRAIN_NEUTRAL = new Color("#555555");
+const STRAIN_STRETCHED = new Color("#4488FF");
+const tmpStrainColor = new Color();
 
 export function Bonds({ molecule, modeIndex }: Props) {
-  const groupRef = useRef<THREE.Group>(null);
-  const meshRefs = useRef<(THREE.Mesh | null)[]>([]);
-  const matRefs = useRef<(THREE.MeshStandardMaterial | null)[]>([]);
+  const groupRef = useRef<GroupType>(null);
+  const meshRefs = useRef<(MeshType | null)[]>([]);
+  const matRefs = useRef<(MatType | null)[]>([]);
 
-  const tmpA = useMemo(() => new THREE.Vector3(), []);
-  const tmpB = useMemo(() => new THREE.Vector3(), []);
-  const tmpDir = useMemo(() => new THREE.Vector3(), []);
-  const tmpQuat = useMemo(() => new THREE.Quaternion(), []);
+  const tmpA = useMemo(() => new Vector3(), []);
+  const tmpB = useMemo(() => new Vector3(), []);
+  const tmpDir = useMemo(() => new Vector3(), []);
+  const tmpQuat = useMemo(() => new Quaternion(), []);
 
   const restLengths = useMemo(() => {
     return molecule.bonds.map((bond) => {
